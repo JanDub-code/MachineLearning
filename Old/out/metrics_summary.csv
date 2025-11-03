@@ -1,0 +1,4 @@
+sector,mae,rmse,n_train,n_test,dataset_csv,pred_csv,model_pkl,coef_csv
+Technology,166.17166431858848,301.54535444511635,628,157,./out\models\Technology\Technology_monthly_dataset.csv,./out\models\Technology\Technology_predictions.csv,./out\models\Technology\Technology_linear_model.pkl,./out\models\Technology\Technology_coefficients.csv
+Consumer,254.035313247413,935.3828778334644,624,157,./out\models\Consumer\Consumer_monthly_dataset.csv,./out\models\Consumer\Consumer_predictions.csv,./out\models\Consumer\Consumer_linear_model.pkl,./out\models\Consumer\Consumer_coefficients.csv
+Industrials,133.34763992943664,186.15477744186973,636,160,./out\models\Industrials\Industrials_monthly_dataset.csv,./out\models\Industrials\Industrials_predictions.csv,./out\models\Industrials\Industrials_linear_model.pkl,./out\models\Industrials\Industrials_coefficients.csv

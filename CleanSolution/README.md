@@ -8,6 +8,22 @@ Tento projekt implementuje **inovativní přístup k predikci cen akcií** kombi
 
 ### 🔑 Klíčová Myšlenka
 
+## Metodologie
+
+### 1. Sběr Dat
+- **Cenová data**: 10 let historie (OHLCV) + Technické indikátory (RSI, MACD, atd.)
+- **Fundamentální data**: Finanční metriky (P/E, ROE, atd.)
+- **Doplnění historie**: Použití AI modelu pro dopočítání chybějících fundamentálních dat v historii.
+
+### 2. Validace a Tuning Modelů (CRITICAL)
+Abychom zajistili robustnost a kvalitu modelů, používáme pokročilé validační techniky:
+- **Cross Validation**: Pro ověření stability modelu na různých podmnožinách dat.
+- **Grid Search**: Pro systematické hledání optimálních hyperparametrů.
+- **Cíl**: Matematicky podložený výběr nejlepšího modelu, nikoliv "náhodný tip".
+
+### 3. Predikce
+- Predikce budoucí ceny na základě kombinace technických a fundamentálních faktorů.
+
 **Problém:**
 - Máme 10 let historických cen (OHLCV data)
 - Ale pouze 1.5 roku fundamentálních dat (P/E, ROE, atd.)

@@ -11,7 +11,19 @@ echo ""
 
 cd scripts
 
-echo "[1/4] FÁZE 2: Stahování fundamentálních dat..."
+echo "[1/5] FÁZE 1: Stahování cenových dat..."
+echo "Odhadovaný čas: 10-15 minut"
+echo ""
+python 0_download_prices.py
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ CHYBA: Skript 0 selhal!"
+    exit 1
+fi
+
+echo ""
+echo "========================================================================"
+echo "[2/5] FÁZE 2: Stahování fundamentálních dat..."
 echo "Odhadovaný čas: 30-45 minut"
 echo ""
 python 1_download_fundamentals.py
@@ -23,7 +35,7 @@ fi
 
 echo ""
 echo "========================================================================"
-echo "[2/4] FÁZE 3: Trénování AI modelu..."
+echo "[3/5] FÁZE 3: Trénování AI modelu..."
 echo "Odhadovaný čas: 5-10 minut"
 echo ""
 python 2_train_fundamental_predictor.py
@@ -35,7 +47,7 @@ fi
 
 echo ""
 echo "========================================================================"
-echo "[3/4] FÁZE 4: Doplňování historických dat..."
+echo "[4/5] FÁZE 4: Doplňování historických dat..."
 echo "Odhadovaný čas: 5-10 minut"
 echo ""
 python 3_complete_historical_data.py
@@ -47,7 +59,7 @@ fi
 
 echo ""
 echo "========================================================================"
-echo "[4/4] FÁZE 5: Trénování predikčního modelu..."
+echo "[5/5] FÁZE 5: Trénování predikčního modelu..."
 echo "Odhadovaný čas: 5-10 minut"
 echo ""
 python 4_train_price_predictor.py

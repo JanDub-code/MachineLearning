@@ -1,586 +1,298 @@
-# 🔄 WORKFLOW - Krok za Krokem Průvodce
+# 🔄 WORKFLOW - Google Colab Průvodce
 
 ## 📖 Úvod
 
-Tento dokument poskytuje **detailní průvodce** celým procesem predikce cen akcií pomocí AI a lineární regrese. Projdeme všech 5 fází projektu s praktickými příklady.
+Tento dokument poskytuje **detailní průvodce** celým procesem klasifikace cenových pohybů akcií pomocí ML. Workflow je optimalizován pro **Google Colab**.
 
 ---
 
-## 🎯 Přehled Fází
+## 🎯 Přehled Notebooků
 
 ```
-FÁZE 1: Sběr OHLCV Dat (10 let)           ✅ HOTOVO (nadřazený projekt)
+📓 01_Data_Collection.ipynb
+   └── Teoretický úvod, stažení OHLCV, technické indikátory
           ↓
-FÁZE 2: Stažení Fundamentů (1.5 roku)     📥 download_fundamentals.py
+📓 02_Train_Fundamental_Predictor.ipynb
+   └── Random Forest Regressor (OHLCV → Fundamenty)
           ↓
-FÁZE 3: AI Model (OHLCV → Fundamenty)     🤖 train_fundamental_predictor.py
+📓 03_Complete_Historical_Data.ipynb
+   └── Imputace chybějících fundamentů (2015-2024)
           ↓
-FÁZE 4: Doplnění Historie (2015-2024)     🔮 complete_historical_data.py
+📓 04_Train_Price_Classifier.ipynb
+   └── Random Forest Classifier (DOWN/HOLD/UP)
           ↓
-FÁZE 5: Predikce Ceny (Fundamenty → $)    💰 train_price_predictor.py
-```
-
----
-
-## ✅ FÁZE 1: Sběr OHLCV Dat (Již hotovo)
-
-### Co máme připravené:
-
-📂 `../data_10y/` obsahuje:
-- `all_sectors_full_10y.csv` - kompletní dataset
-- `Technology_full_10y.csv`, `Consumer_full_10y.csv`, `Industrials_full_10y.csv`
-- Tickery pro každý sektor
-
-### Struktura dat:
-
-```csv
-date, ticker, sector, open, high, low, close, volume,
-volatility, returns, rsi_14, macd, macd_signal, macd_hist,
-sma_3, sma_6, sma_12, ema_3, ema_6, ema_12,
-dividends, split_occurred, volume_change
-```
-
-### Ověření:
-
-```python
-import pandas as pd
-
-df = pd.read_csv('../data_10y/all_sectors_full_10y.csv')
-print(f"Záznamů: {len(df)}")
-print(f"Období: {df['date'].min()} → {df['date'].max()}")
-print(f"Tickery: {df['ticker'].nunique()}")
-```
-
-**Očekávaný výstup:**
-```
-Záznamů: ~18,000
-Období: 2015-01-31 → 2025-10-31
-Tickery: 150
+📓 05_Hyperparameter_Tuning.ipynb
+   └── Grid Search s TimeSeriesSplit (volitelný)
+          ↓
+📓 06_Final_Evaluation.ipynb
+   └── Kompletní evaluace + grafy pro diplomovou práci
 ```
 
 ---
 
-## 📥 FÁZE 2: Stažení Fundamentálních Dat
+## 📓 Notebook 01: Data Collection
 
-### Cíl:
-Stáhnout fundamentální metriky pro období 2024-2025 (cca 1.5 roku)
+### Cíl
+Připravit kompletní dataset OHLCV + technické indikátory
 
-### Způsob A: Python Skript (lokálně)
+### Obsah
+1. **Teoretický úvod**
+   - Efektivní hypotéza trhů (EMH)
+   - Omezení predikce cen
+   - Klasifikace vs regrese
 
-```bash
-cd CleanSolution/scripts
-python 1_download_fundamentals.py
+2. **Stažení OHLCV dat**
+   - yfinance API
+   - 10 let měsíční historie
+   - 150 S&P 500 akcií
+
+3. **Technické indikátory**
+   - RSI (14 period)
+   - MACD (12, 26, 9)
+   - SMA/EMA (3, 6, 12 měsíců)
+   - Volatilita, momentum
+
+### Výstup
 ```
-
-**Co skript dělá:**
-1. Načte seznam tickerů z `../data_10y/`
-2. Pro každý ticker stáhne quarterly financials z yfinance
-3. Vypočítá 14 fundamentálních metrik
-4. Uloží do `../data/fundamentals/`
-
-**Výstup:**
+data/ohlcv/
+├── all_sectors_ohlcv_10y.csv
+├── Technology_ohlcv_10y.csv
+├── Consumer_ohlcv_10y.csv
+└── Industrials_ohlcv_10y.csv
 ```
-data/fundamentals/
-├── all_sectors_fundamentals.csv
-├── Technology_fundamentals.csv
-├── Consumer_fundamentals.csv
-└── Industrials_fundamentals.csv
-```
-
-### Způsob B: Google Colab Notebook
-
-1. Otevřete `notebooks/Part1_DataPreparation_AI.ipynb`
-2. Nahrajte OHLCV data na Google Drive
-3. Připojte Drive a spusťte notebook
-4. Sekce 4 stahuje fundamenty automaticky
-
-### Očekávané metriky:
-
-| Kategorie | Metriky |
-|-----------|---------|
-| **Valuační** | P/E, P/B, P/S, EV/EBITDA |
-| **Profitabilita** | ROE, ROA, Profit Margin, Operating Margin, Gross Margin |
-| **Finanční zdraví** | Debt-to-Equity, Current Ratio, Quick Ratio |
-| **Růst** | Revenue Growth YoY, Earnings Growth YoY |
-
-### Ověření:
-
-```python
-import pandas as pd
-
-df = pd.read_csv('data/fundamentals/all_sectors_fundamentals.csv')
-print(f"Záznamů: {len(df)}")
-print(f"Tickery: {df['ticker'].nunique()}")
-print(f"Columns: {df.columns.tolist()}")
-```
-
-**Očekávaný výstup:**
-```
-Záznamů: ~600-900 (závisí na dostupnosti dat)
-Tickery: 100-150
-Columns: ['date', 'ticker', 'sector', 'PE', 'PB', 'PS', ...]
-```
-
-### ⚠️ Možné problémy:
-
-**Problém:** yfinance vrací prázdná data pro některé tickery
-- **Řešení:** Normální, ne všechny firmy mají kompletní quarterly data
-- Skript automaticky přeskočí problematické tickery
-
-**Problém:** Rate limiting (příliš mnoho requestů)
-- **Řešení:** Skript má built-in `time.sleep(0.5)` mezi requesty
-- Pro větší bezpečnost zvyšte na `time.sleep(1.0)`
 
 ---
 
-## 🤖 FÁZE 3: Trénování AI Modelu
+## 📓 Notebook 02: Train Fundamental Predictor
 
-### Cíl:
-Natrénovat Random Forest model, který predikuje fundamenty z OHLCV dat
+### Cíl
+Natrénovat RF Regressor pro predikci fundamentálních metrik z OHLCV
 
-### Způsob A: Python Skript
+### Problém
+- Fundamentální data dostupná pouze za 1.5 roku (2024-2025)
+- OHLCV data za 10 let (2015-2025)
+- Pro klasifikaci potřebujeme kompletní dataset
 
-```bash
-python scripts/2_train_fundamental_predictor.py
-```
+### Řešení
+Multi-output Random Forest Regressor:
+- **Input:** 18 OHLCV + technických features
+- **Output:** 11 fundamentálních metrik
 
-**Co skript dělá:**
-1. Načte OHLCV data (2015-2025) a fundamenty (2024-2025)
-2. Spojí data pomocí forward-fill
-3. Připraví features (OHLCV + technické indikátory)
-4. Trénuje Multi-output Random Forest (100 trees, max_depth=20)
-5. Evaluuje na test setu (80/20 split)
-6. Analyzuje feature importance
-7. Uloží model a výsledky
+### Obsah
+1. Načtení dat
+2. Feature engineering
+3. Trénink RF Regressor
+4. Evaluace (MAE, RMSE, R²)
+5. Feature importance analýza
 
-**Výstup:**
+### Výstup
 ```
 models/
-├── fundamental_predictor.pkl      # Natrénovaný model
-└── feature_scaler.pkl             # StandardScaler pro features
-
-data/analysis/
-├── fundamental_predictor_metrics.csv        # MAE, RMSE, R² pro každou metriku
-├── feature_importance_fundamentals.csv      # Důležitost features
-└── fundamental_predictions_vs_actual.csv    # Predikce vs. skutečnost
+├── fundamental_predictor.pkl
+└── feature_scaler.pkl
 ```
-
-### Způsob B: Google Colab
-
-Spusťte sekce 6-8 v `Part1_DataPreparation_AI.ipynb`
-
-### Očekávané výsledky:
-
-**Cílové metriky:**
-- **MAE < 15%** (relativní chyba)
-- **R² > 0.70** (vysvětleno 70% variance)
-
-**Příklad výstupu:**
-```
-📊 PRŮMĚR:
-   MAE: 3.245
-   MAE%: 14.2%
-   RMSE: 5.123
-   R²: 0.743
-```
-
-### Interpretace výsledků:
-
-| MAE% | Hodnocení | Akce |
-|------|-----------|------|
-| < 15% | ✨ Výborně! | Pokračujte na FÁZI 4 |
-| 15-20% | 👍 Dobře | Použitelné, pokračujte |
-| > 20% | ⚠️ Vyšší chyba | Zvažte tuning nebo více dat |
-
-### Feature Importance analýza:
-
-**Očekávané top features:**
-- `close` - současná cena (silná korelace s valuačními ratios)
-- `rsi_14` - RSI indikátor (sentiment)
-- `volume` - objem obchodování
-- `volatility` - volatilita (souvisí s rizikem)
-- `macd` - momentum
 
 ---
 
-## 🔮 FÁZE 4: Doplnění Historických Dat
+## 📓 Notebook 03: Complete Historical Data
 
-### Cíl:
-Použít AI model k predikci fundamentů pro období 2015-2024
+### Cíl
+Použít natrénovaný model k doplnění chybějících fundamentů
 
-### Spuštění:
+### Proces
+1. Načíst OHLCV data (2015-2024)
+2. Aplikovat feature scaler
+3. Predikovat fundamentální metriky
+4. Validovat výsledky (sanity checks)
+5. Spojit s reálnými daty (2024-2025)
 
-```bash
-python scripts/3_complete_historical_data.py
-```
+### Sanity Checks
+- P/E ratio: 0 < P/E < 100
+- ROE: -50% < ROE < 100%
+- Debt/Equity: 0 < D/E < 10
 
-**Co skript dělá:**
-1. Načte natrénovaný AI model
-2. Načte OHLCV data (2015-2025)
-3. **Predikuje fundamenty pro 2015-2024** pomocí AI modelu
-4. Spojí predikované (2015-2024) + reálné (2024-2025) fundamenty
-5. Vytvoří kompletní 10letý dataset
-6. Validuje predikce (srovnání průměrů)
-7. Uloží kompletní data
-
-**Výstup:**
+### Výstup
 ```
 data/complete/
-├── all_sectors_complete_10y.csv
-├── Technology_complete_10y.csv
-├── Consumer_complete_10y.csv
-└── Industrials_complete_10y.csv
+└── all_sectors_complete_10y.csv
 ```
-
-### Struktura výstupního datasetu:
-
-```csv
-date, ticker, sector,
-open, high, low, close, volume, volatility, returns, rsi_14, ...  # OHLCV + technické
-PE, PB, PS, EV_EBITDA, ROE, ROA, ...                              # Fundamenty
-data_source                                                         # 'predicted' nebo 'real'
-```
-
-**Sloupec `data_source`:**
-- `predicted` = fundamenty predikované AI modelem (2015-2024)
-- `real` = reálné fundamenty z yfinance (2024-2025)
-
-### Validace:
-
-Skript automaticky srovná průměry predikovaných vs. reálných hodnot:
-
-```
-📊 Srovnání predikovaných vs. reálných hodnot:
-Metrika                   Predikované (mean)   Reálné (mean)        Rozdíl %
------------------------------------------------------------------------------------
-PE                        24.3215              26.1820              7.2%
-ROE                       0.1823               0.1965               7.8%
-Revenue_Growth_YoY        0.0842               0.0915               8.7%
-```
-
-**Dobrá validace:** Rozdíly < 20%  
-**Pozor:** Rozdíly > 30% mohou indikovat problém s modelem
 
 ---
 
-## 💰 FÁZE 5: Trénování Modelu pro Predikci Ceny
+## 📓 Notebook 04: Train Price Classifier
 
-### Cíl:
-Natrénovat Ridge Regression model, který predikuje cenu z fundamentů
+### Cíl
+Natrénovat ternární klasifikátor pro predikci cenových pohybů
 
-### Spuštění:
+### Definice Tříd (±3% threshold)
+| Třída | Label | Definice |
+|-------|-------|----------|
+| DOWN | 0 | Return < -3% |
+| HOLD | 1 | -3% ≤ Return ≤ +3% |
+| UP | 2 | Return > +3% |
 
-```bash
-python scripts/4_train_price_predictor.py
-```
+### Proč 3%?
+Pokrývá transakční náklady:
+- Bid-ask spread: ~0.5%
+- Broker fees: ~0.5%
+- Slippage: ~1%
+- Reserve: ~1%
 
-**Co skript dělá:**
-1. Načte kompletní dataset (10 let OHLCV + fundamenty)
-2. Vytvoří target: `log_price_next_month`
-3. Připraví features: fundamenty + technické indikátory
-4. Trénuje **samostatný Ridge model pro každý sektor**
-5. Evaluuje na test setu (chronologický split 80/20)
-6. Analyzuje koeficienty (feature importance)
-7. Vytváří vizualizace
-8. Uloží modely
+### Obsah
+1. Vytvoření target variable
+2. Feature selection
+3. Chronologický train/test split
+4. Trénink RF Classifier
+5. Evaluace per sektor
 
-**Výstup:**
+### Výstup
 ```
 models/
-├── Technology_price_model.pkl
-├── Technology_price_scaler.pkl
-├── Consumer_price_model.pkl
-├── Consumer_price_scaler.pkl
-├── Industrials_price_model.pkl
-└── Industrials_price_scaler.pkl
-
-data/analysis/
-├── price_prediction_metrics_summary.csv
-├── Technology_price_predictions.csv
-├── Technology_price_coefficients.csv
-├── sector_mae_comparison.png
-└── sector_r2_comparison.png
-```
-
-### Očekávané výsledky:
-
-**Cílové metriky:**
-- **MAE < $15** (průměrná absolutní chyba v dolarech)
-- **R² > 0.75** (vysvětleno 75% variance)
-
-**Příklad výstupu:**
-```
-📊 SOUHRNNÉ VÝSLEDKY
-
-Technology:
-  Test MAE:  $14.23
-  Test RMSE: $19.87
-  Test R²:   0.781
-
-Consumer:
-  Test MAE:  $10.54
-  Test RMSE: $14.21
-  Test R²:   0.823
-
-Industrials:
-  Test MAE:  $11.89
-  Test RMSE: $15.44
-  Test R²:   0.798
-
-📈 PRŮMĚR VŠECH SEKTORŮ:
-  • MAE:  $12.22
-  • R²:   0.801
-```
-
-### Feature Coefficients analýza:
-
-**TOP 10 FEATURES pro Technology:**
-```
-+ PE                      :   0.3421  (vyšší P/E → vyšší cena)
-+ Revenue_Growth_YoY      :   0.2873  (růst tržeb zvyšuje cenu)
-+ ROE                     :   0.2156  (profitabilita)
-+ PB                      :   0.1987
-+ Profit_Margin           :   0.1562
-- Debt_to_Equity          :  -0.1343  (dluh snižuje cenu)
-- volatility              :  -0.0894  (volatilita je riziková)
-+ close                   :   0.0832
-+ Operating_Margin        :   0.0765
-+ rsi_14                  :   0.0621
-```
-
-**Interpretace:**
-- **Pozitivní koeficient** = zvýšení této metriky zvyšuje cenu
-- **Negativní koeficient** = zvýšení této metriky snižuje cenu
-- **Velikost koeficientu** = síla vlivu
-
----
-
-## 🎯 Použití Natrénovaných Modelů
-
-### Predikce ceny pro novou firmu:
-
-```python
-import pandas as pd
-import numpy as np
-from joblib import load
-
-# 1. Načtení modelu a scaleru
-model = load('models/Technology_price_model.pkl')
-scaler = load('models/Technology_price_scaler.pkl')
-
-# 2. Příprava vstupních dat
-input_data = pd.DataFrame({
-    # Fundamenty
-    'PE': [28.5],
-    'PB': [40.2],
-    'PS': [7.8],
-    'EV_EBITDA': [22.1],
-    'ROE': [0.45],
-    'ROA': [0.18],
-    'Profit_Margin': [0.25],
-    'Operating_Margin': [0.30],
-    'Gross_Margin': [0.42],
-    'Debt_to_Equity': [1.5],
-    'Current_Ratio': [1.8],
-    'Quick_Ratio': [1.5],
-    'Revenue_Growth_YoY': [0.12],
-    'Earnings_Growth_YoY': [0.15],
-    
-    # Technické
-    'volatility': [0.015],
-    'returns': [0.02],
-    'rsi_14': [62.0],
-    'macd': [1.2],
-    'volume_change': [0.05]
-})
-
-# 3. Standardizace
-X_scaled = scaler.transform(input_data)
-
-# 4. Predikce
-log_price_pred = model.predict(X_scaled)[0]
-predicted_price = np.exp(log_price_pred)
-
-print(f"Predikovaná cena za měsíc: ${predicted_price:.2f}")
-```
-
-### Analýza důležitosti faktorů:
-
-```python
-# Načtení koeficientů
-coef_df = pd.read_csv('data/analysis/Technology_price_coefficients.csv')
-coef_df = coef_df.sort_values('abs_coefficient', ascending=False)
-
-print("TOP 10 FAKTORŮ OVLIVŇUJÍCÍCH CENU:")
-print(coef_df.head(10))
+└── rf_classifier_all_sectors.pkl
 ```
 
 ---
 
-## 📊 Analýza a Vizualizace
+## 📓 Notebook 05: Hyperparameter Tuning
 
-### Srovnání predikcí s reálnými cenami:
+### Cíl
+Najít optimální hyperparametry pomocí Grid Search
 
-```python
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Načtení predikcí
-pred = pd.read_csv('data/analysis/Technology_price_predictions.csv')
-pred['date'] = pd.to_datetime(pred['date'])
-
-# Vizualizace pro jeden ticker
-ticker = 'AAPL'
-ticker_pred = pred[pred['ticker'] == ticker]
-
-plt.figure(figsize=(14, 6))
-plt.plot(ticker_pred['date'], ticker_pred['price_true'], label='Skutečná cena', linewidth=2)
-plt.plot(ticker_pred['date'], ticker_pred['price_pred'], label='Predikovaná cena', linestyle='--', linewidth=2)
-plt.xlabel('Datum')
-plt.ylabel('Cena ($)')
-plt.title(f'{ticker} - Predikce vs. Skutečnost')
-plt.legend()
-plt.grid(alpha=0.3)
-plt.show()
+### TimeSeriesSplit
+Speciální cross-validation pro časové řady:
+```
+Fold 1: [Train: ████████] [Test: ██]
+Fold 2: [Train: ██████████] [Test: ██]
+Fold 3: [Train: ████████████] [Test: ██]
 ```
 
-### Error analýza:
+### Parametrový prostor (RF)
+| Parametr | Hodnoty |
+|----------|---------|
+| n_estimators | [100, 200, 300] |
+| max_depth | [10, 15, 20, None] |
+| min_samples_split | [2, 5, 10] |
+| min_samples_leaf | [1, 2, 4] |
 
-```python
-# MAE distribution
-errors = abs(pred['price_pred'] - pred['price_true'])
+### Obsah
+1. Grid Search pro RF Regressor
+2. Grid Search pro RF Classifier
+3. Porovnání s Gradient Boosting
+4. Vizualizace výsledků
 
-plt.figure(figsize=(10, 6))
-plt.hist(errors, bins=50, edgecolor='black', alpha=0.7)
-plt.axvline(errors.mean(), color='red', linestyle='--', linewidth=2, label=f'Průměr: ${errors.mean():.2f}')
-plt.xlabel('Absolutní chyba ($)')
-plt.ylabel('Počet predikcí')
-plt.title('Distribuce Chyb Predikce')
-plt.legend()
-plt.show()
+### Výstup
+```
+models/
+├── fundamental_predictor_tuned.pkl
+├── price_classifier_tuned.pkl
+└── optimal_hyperparameters.json
 ```
 
 ---
 
-## ⚠️ Troubleshooting
+## 📓 Notebook 06: Final Evaluation
 
-### Problém 1: Chybějící data
+### Cíl
+Kompletní evaluace + vizualizace pro diplomovou práci
 
-**Chyba:**
+### Obsah
+1. **Klasifikační metriky**
+   - Accuracy, Precision, Recall, F1
+   - Classification Report
+
+2. **Vizualizace**
+   - Confusion Matrix
+   - ROC křivky (per class)
+   - Feature Importance
+
+3. **Sektorová analýza**
+   - Porovnání Technology vs Consumer vs Industrials
+
+4. **Backtesting**
+   - Simulace obchodní strategie
+   - Equity curve, Drawdown
+   - Sharpe Ratio
+
+### Výstup
 ```
-FileNotFoundError: ../data_10y/all_sectors_full_10y.csv
-```
-
-**Řešení:**
-- Ujistěte se, že jste spustili `prepare_10y_data_full.py` z nadřazeného projektu
-- Zkontrolujte relativní cesty v konfiguračních konstantách
-- Případně vytvořte symlink: `ln -s ../../data_10y data/ohlcv_10y`
-
-### Problém 2: Nízká přesnost AI modelu (MAE > 20%)
-
-**Možné příčiny:**
-- Málo trénovacích dat (< 500 vzorků)
-- Chybějící fundamenty pro mnoho tickerů
-- Outliers v datech
-
-**Řešení:**
-1. Zvýšit počet tickerů (stáhnout více fundamentálních dat)
-2. Hyperparameter tuning:
-   ```python
-   RF_PARAMS = {
-       'n_estimators': 200,  # zvýšit
-       'max_depth': 30,      # zvýšit
-       'min_samples_split': 3
-   }
-   ```
-3. Feature selection (odstranit málo důležité features)
-
-### Problém 3: Nízký R² score pro predikci ceny (< 0.60)
-
-**Možné příčiny:**
-- Predikované fundamenty mají vysokou chybu
-- Linearita není vhodná pro data
-- Chybějící důležité faktory
-
-**Řešení:**
-1. Zlepšit AI model z FÁZE 3
-2. Zkusit jiný model (ElasticNet, Gradient Boosting)
-3. Přidat více features
-4. Ensemble modely
-
-### Problém 4: Memory Error při trénování
-
-**Řešení:**
-```python
-# Redukovat velikost datasetu
-df = df.sample(frac=0.5, random_state=42)  # Použít 50% dat
-
-# Nebo trénovat po sektorech
-for sector in ['Technology', 'Consumer', 'Industrials']:
-    sector_df = df[df['sector'] == sector]
-    # trénování...
+figures/
+├── confusion_matrix.png
+├── roc_curves.png
+├── sector_comparison.png
+├── feature_importance.png
+└── backtest_equity.png
 ```
 
 ---
 
-## 📈 Best Practices
+## 🔧 Praktické Tipy
 
-### 1. Pravidelná Re-trénování
-
-Modely by měly být re-trénovány každých **3-6 měsíců** s novými daty.
-
-### 2. Cross-Validation
-
-Pro robustnější evaluaci použijte K-fold cross-validation:
-
+### Google Colab Setup
 ```python
-from sklearn.model_selection import cross_val_score
+from google.colab import drive
+drive.mount('/content/drive')
 
-scores = cross_val_score(model, X_scaled, y, cv=5, scoring='neg_mean_absolute_error')
-print(f"CV MAE: {-scores.mean():.2f} ± {scores.std():.2f}")
+DRIVE_PATH = '/content/drive/MyDrive/MachineLearning'
 ```
 
-### 3. Confidence Intervals
-
-Pro odhad nejistoty použijte bootstrap:
-
+### Ukládání modelů
 ```python
-from sklearn.utils import resample
+import joblib
 
-predictions = []
-for _ in range(100):
-    X_boot, y_boot = resample(X_test, y_test)
-    pred = model.predict(X_boot)
-    predictions.append(pred)
+# Uložit
+joblib.dump(model, f'{MODEL_PATH}/model.pkl')
 
-predictions = np.array(predictions)
-lower = np.percentile(predictions, 2.5, axis=0)
-upper = np.percentile(predictions, 97.5, axis=0)
+# Načíst
+model = joblib.load(f'{MODEL_PATH}/model.pkl')
 ```
 
-### 4. Monitoring
-
-Sledujte průběžně:
-- MAE trend v čase
-- Distribution shifty (změny v distribuci dat)
-- Feature drift (změny v importanci features)
+### Ukládání grafů
+```python
+plt.savefig(f'{FIGURES_PATH}/graph.png', dpi=300, bbox_inches='tight')
+```
 
 ---
 
-## 🎓 Další Zdroje
+## 📊 Očekávané Výsledky
 
-### Doporučená Literatura:
-- **Scikit-learn Documentation:** https://scikit-learn.org/
-- **yfinance GitHub:** https://github.com/ranaroussi/yfinance
-- **Financial ML:** "Advances in Financial Machine Learning" - Marcos López de Prado
-
-### Užitečné Tutoriály:
-- Time Series Cross-Validation
-- Feature Engineering for Financial Data
-- Ensemble Methods in ML
+| Notebook | Klíčová metrika | Očekávaná hodnota |
+|----------|-----------------|-------------------|
+| 02 | RF Regressor R² | > 0.60 |
+| 04 | Classifier Accuracy | 55-60% |
+| 04 | F1-Score (weighted) | 0.55-0.60 |
+| 06 | Win Rate (backtest) | 55-60% |
+| 06 | Sharpe Ratio | > 0.5 |
 
 ---
 
-**Autor:** Bc. Jan Dub  
-**Poslední aktualizace:** Říjen 2025  
-**Verze:** 1.0.0
+## ❓ FAQ
+
+### Proč Google Colab místo lokálního Jupyter?
+1. Bezplatné GPU/TPU
+2. Jednotné prostředí
+3. Snadné sdílení
+4. Integrace s Google Drive
+
+### Proč klasifikace místo regrese?
+1. Praktičtější output (BUY/HOLD/SELL)
+2. Robustní vůči outliers
+3. Lépe interpretovatelné výsledky
+
+### Proč Random Forest místo Neural Network?
+1. Menší dataset (tisíce, ne miliony záznamů)
+2. Interpretabilita (feature importance)
+3. Nepotřebuje GPU
+4. Rychlý trénink
+
+---
+
+## ✅ Checklist
+
+- [ ] Nahrát data do Google Drive
+- [ ] Spustit Notebook 01 (Data Collection)
+- [ ] Spustit Notebook 02 (Fundamental Predictor)
+- [ ] Spustit Notebook 03 (Complete Data)
+- [ ] Spustit Notebook 04 (Price Classifier)
+- [ ] Spustit Notebook 05 (Hyperparameter Tuning) - volitelné
+- [ ] Spustit Notebook 06 (Final Evaluation)
+- [ ] Stáhnout grafy pro diplomovou práci

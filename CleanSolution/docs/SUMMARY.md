@@ -261,7 +261,7 @@ python 4_train_price_predictor.py
 2. Otevřete Part1_DataPreparation_AI.ipynb v Colabu
 3. Spusťte všechny buňky (FÁZE 2-3)
 4. Stáhněte natrénovaný model z Drive
-5. (Volitelně) Pokračujte s Part2_PricePrediction.ipynb (FÁZE 4-5)
+5. (Volitelně) Pokračujte s Part2_PriceClassification.ipynb (FÁZE 4-5)
 ```
 
 **Výhody Colabu:**
@@ -274,91 +274,121 @@ python 4_train_price_predictor.py
 
 ## 📊 Očekávané Výsledky
 
-### FÁZE 3: AI Model (Fundamenty)
+### FÁZE 3: Imputační Model (Fundamenty)
 
 ```
-✅ Průměrná přesnost: 14.2% MAE
-✅ R² score: 0.743
-✅ Top features: close, rsi_14, volume
+✅ Průměrná přesnost: MAE < 15%
+✅ R² score: > 0.70
+✅ Top features: close, rsi_14, volume, volatility
 ```
 
-### FÁZE 5: Predikce Ceny
+### FÁZE 5: Klasifikace Cenových Pohybů
 
 ```
-✅ Technology:   MAE = $14.23,  R² = 0.781
-✅ Consumer:     MAE = $10.54,  R² = 0.823
-✅ Industrials:  MAE = $11.89,  R² = 0.798
+✅ Accuracy: > 40% (baseline = 33.3%)
+✅ Macro F1: > 0.35
+✅ UP Precision: > 50%
+✅ DOWN Precision: > 50%
+```
 
-✅ Průměr:       MAE = $12.22,  R² = 0.801
+**Trading Strategie:**
+```
+"BUY when UP predicted":
+  - Hit rate: > 55%
+  - Průměrný return: > +2%/měsíc
+
+"SELL when DOWN predicted":
+  - Hit rate: > 55%
+  - Průměrný return akcie: < -2%/měsíc
 ```
 
 **Srovnání s Baseline:**
 ```
-Baseline (průměr sektoru): MAE ~$45
-Náš model:                 MAE ~$12
-→ Zlepšení o 73%! 🎉
+Baseline (random guess): 33.3% accuracy
+Náš model:               ~42% accuracy
+→ Zlepšení o ~25%! 🎉
 ```
 
 ---
 
 ## 💡 Klíčové Inovace
 
-### 1. Hybrid AI + Classical ML
+### 1. Hybridní ML Pipeline
 
 **Proč je to unikátní:**
-- AI (Random Forest) doplní historická data
-- Lineární regrese zajistí interpretovatelnost
-- Kombinace přesnosti a vysvětlitelnosti
+- Random Forest Regressor pro imputaci dat
+- Random Forest Classifier pro predikci směru
+- Kombinace flexibility a interpretability
 
-### 2. Kompletní 10letý Dataset
+### 2. Řešení Problému Neúplných Dat
 
-**Tradiční přístup:** Pouze 1.5 roku dat → přetrénování
-**Náš přístup:** 10 let dat → robustní model
+**Tradiční přístup:** Pouze 1.5 roku fundamentálních dat → omezený trénink
+**Náš přístup:** ML imputace → 10 let dat → robustní model
 
-### 3. Sektorová Segmentace
+### 3. Klasifikace místo Regrese
 
-Každý sektor má vlastní model → lepší přesnost
+**Tradiční přístup:** Predikce přesné ceny → nepraktické
+**Náš přístup:** Klasifikace směru (DOWN/HOLD/UP) → přímé trading signály
+
+### 4. Sektorová Segmentace
+
+Každý sektor má vlastní model → respektuje sektorovou specificitu
 
 ---
 
 ## ⚠️ Omezení a Upozornění
 
 ### Datová Omezení:
-- ❌ Fundamenty jen 1.5 roku (predikce pro starší období mají vyšší nejistotu)
-- ❌ Survivorship bias (S&P 500 obsahuje jen úspěšné firmy)
-- ❌ Look-ahead bias (pozor na použití budoucích dat)
+| Omezení | Popis | Mitigace |
+|---------|-------|----------|
+| Fundamenty 1.5 roku | Starší data jsou imputovaná | Confidence intervals |
+| Survivorship bias | Pouze aktuální S&P 500 firmy | Explicitní disclaimer |
+| Look-ahead bias | Fundamenty publikovány se zpožděním | Lag dat |
 
 ### Modelová Omezení:
-- ⚠️ AI predikce fundamentů ~15% chyba
-- ⚠️ Externí šoky (COVID, války) nejsou predikovatelné
-- ⚠️ Linearita nemusí vždy platit
+| Omezení | Popis | Mitigace |
+|---------|-------|----------|
+| Imputační chyba | ~15% chyba v predikovaných fundamentech | Propagace nejistoty |
+| Stacionarita | Tržní dynamika se mění | Periodic retraining |
+| Externí šoky | COVID, války neprediktovatelné | Risk management |
 
 ### Doporučení:
-- ✅ Používejte confidence intervals
-- ✅ Validujte na různých časových obdobích
-- ✅ Srovnávejte s baseline modely
-- ✅ Re-trénujte modely každých 3-6 měsíců
+- ✅ Používejte confidence thresholds (> 60%)
+- ✅ Kombinujte s dalšími signály
+- ✅ Re-trénujte každých 3-6 měsíců
+- ✅ Nepředpokládejte kauzalitu
+
+---
+
+## 📚 Akademická Dokumentace
+
+| Dokument | Obsah |
+|----------|-------|
+| [METHODOLOGY.md](METHODOLOGY.md) | Teoreticko-metodologický rámec |
+| [MATHEMATICAL_FOUNDATIONS.md](MATHEMATICAL_FOUNDATIONS.md) | Formální definice a důkazy |
+| [ALGORITHM_SELECTION.md](ALGORITHM_SELECTION.md) | Zdůvodnění volby algoritmů |
+| [WORKFLOW.md](WORKFLOW.md) | Praktický průvodce |
 
 ---
 
 ## 🔜 Další Možná Rozšíření
 
 ### Short-term (1-2 týdny):
-- [ ] Part2 Jupyter Notebook (FÁZE 4-5 v Colabu)
-- [ ] Hyperparameter tuning (Grid Search)
-- [ ] Ensemble modely (RF + XGBoost)
+- [ ] Hyperparameter tuning (Grid Search / Random Search)
+- [ ] Cross-validation s TimeSeriesSplit
+- [ ] Calibrated probability outputs
 
 ### Mid-term (1 měsíc):
 - [ ] Web dashboard (Streamlit/Gradio)
-- [ ] API endpoint pro predikce
 - [ ] Backtesting framework
-- [ ] Automatické re-trénování
+- [ ] Ensemble modely (RF + XGBoost + LightGBM)
+- [ ] Alternative data (sentiment)
 
 ### Long-term (3+ měsíce):
-- [ ] Deep Learning modely (LSTM, Transformers)
-- [ ] Sentiment analysis (news, social media)
-- [ ] Portfolio optimization
-- [ ] Real-time predikce
+- [ ] Deep Learning (LSTM, Transformers)
+- [ ] Reinforcement Learning pro portfolio
+- [ ] Real-time prediction pipeline
+- [ ] Multi-asset class rozšíření
 
 ---
 
@@ -369,52 +399,48 @@ Každý sektor má vlastní model → lepší přesnost
 | **Jazyk** | Python 3.8+ |
 | **ML Framework** | scikit-learn |
 | **Data** | pandas, numpy |
-| **Vizualizace** | matplotlib, seaborn, plotly |
+| **Vizualizace** | matplotlib, seaborn |
 | **Data Source** | yfinance |
 | **Notebooky** | Jupyter, Google Colab |
 | **Persistence** | joblib |
 
 ---
 
-## 📞 Podpora a Kontakt
+## 📞 Kontakt
 
 **Autor:** Bc. Jan Dub  
-**Email:** (doplňte)  
-**GitHub:** (doplňte)  
-**Datum:** Říjen 2025
+**Program:** Ing. Informatika  
+**Rok:** 2025
 
 ---
 
 ## 📜 Licence
 
-Tento projekt je určen pro **vzdělávací účely**. Používání pro reálné investiční rozhodnutí je na vlastní riziko.
+Tento projekt je určen pro **vzdělávací a výzkumné účely** v rámci diplomové práce.  
+Používání pro reálné investiční rozhodnutí je na vlastní riziko.
 
 ---
 
 ## 🎉 Závěr
 
-**CleanSolution** je kompletní, production-ready implementace predikce cen akcií pomocí AI a lineární regrese. Všechny skripty, notebooky a dokumentace jsou připraveny k použití.
+**CleanSolution** je kompletní implementace predikce cenových pohybů akcií pomocí strojového učení:
 
-### Co máte k dispozici:
+### Co obsahuje:
 
-✅ 4 Python skripty pro celý pipeline  
-✅ 1 Google Colab Notebook (FÁZE 2-3)  
-✅ Kompletní dokumentaci (README + WORKFLOW)  
-✅ Requirements.txt s dependency managementem  
-✅ Strukturovaný projekt připravený pro rozšíření
+✅ 5 Python skriptů pro celý pipeline  
+✅ Jupyter Notebooky pro Google Colab  
+✅ Kompletní akademická dokumentace  
+✅ Teoreticko-metodologický rámec pro diplomovou práci  
+✅ Matematické formalizace a důkazy
 
-### Další kroky:
+### Klíčové Přínosy:
 
-1. **Spusťte pipeline** podle WORKFLOW.md
-2. **Experimentujte** s hyperparametry
-3. **Analyzujte výsledky** v `data/analysis/`
-4. **Sdílejte** své výsledky a získejte feedback
-
----
-
-**🚀 Hodně štěstí s vaším projektem!**
+1. **Inovativní řešení neúplnosti dat** pomocí ML imputace
+2. **Prakticky použitelné trading signály** (DOWN/HOLD/UP)
+3. **Interpretabilní modely** s feature importance analýzou
+4. **Rigorózní metodologie** vhodná pro akademickou práci
 
 ---
 
-*Vytvořeno s ❤️ pomocí GitHub Copilot*  
-*Poslední aktualizace: 31. října 2025*
+*Vytvořeno pro diplomovou práci Ing. Informatika*  
+*Poslední aktualizace: Prosinec 2025*

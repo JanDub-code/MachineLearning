@@ -1,39 +1,44 @@
-# 🎯 CleanSolution - Predikce Cen Akcií pomocí AI & Lineární Regrese
+# 🎯 CleanSolution - Klasifikace Cenových Pohybů Akcií pomocí ML
+
+## Diplomová Práce - Ing. Informatika
+
+**Autor:** Bc. Jan Dub  
+**Datum:** Prosinec 2025
+
+---
 
 ## 📖 O Projektu
 
-Tento projekt implementuje **inovativní přístup k predikci cen akcií** kombinací:
-1. **AI modelu (Random Forest)** - pro doplnění historických fundamentálních dat
-2. **Lineární regrese (Ridge)** - pro interpretovatelnou predikci cen z fundamentů
+Tento projekt implementuje **hybridní přístup k predikci směru cenových pohybů akcií** kombinací:
 
-### 🔑 Klíčová Myšlenka
+1. **Random Forest Regressor** - pro imputaci chybějících historických fundamentálních dat
+2. **Random Forest Classifier** - pro klasifikaci budoucích cenových pohybů (DOWN/HOLD/UP)
 
-## Metodologie
+### 🔑 Klíčová Inovace
 
-### 1. Sběr Dat
-- **Cenová data**: 10 let historie (OHLCV) + Technické indikátory (RSI, MACD, atd.)
-- **Fundamentální data**: Finanční metriky (P/E, ROE, atd.)
-- **Doplnění historie**: Použití AI modelu pro dopočítání chybějících fundamentálních dat v historii.
-
-### 2. Validace a Tuning Modelů (CRITICAL)
-Abychom zajistili robustnost a kvalitu modelů, používáme pokročilé validační techniky:
-- **Cross Validation**: Pro ověření stability modelu na různých podmnožinách dat.
-- **Grid Search**: Pro systematické hledání optimálních hyperparametrů.
-- **Cíl**: Matematicky podložený výběr nejlepšího modelu, nikoliv "náhodný tip".
-
-### 3. Predikce
-- Predikce budoucí ceny na základě kombinace technických a fundamentálních faktorů.
-
-**Problém:**
-- Máme 10 let historických cen (OHLCV data)
-- Ale pouze 1.5 roku fundamentálních dat (P/E, ROE, atd.)
+Projekt řeší fundamentální problém v kvantitativních financích: **neúplnost historických fundamentálních dat**. Zatímco cenová data (OHLCV) jsou dostupná za 10+ let, fundamentální metriky (P/E, ROE, atd.) jsou typicky dostupné pouze za 1-2 roky.
 
 **Řešení:**
-1. Sbíráme fundamentální data za dostupné období (1.5 roku)
-2. Trénujeme AI model, který se naučí predikovat fundamenty z OHLCV dat
-3. Používáme AI model k doplnění chybějících 8.5 let fundamentů
-4. Trénujeme lineární regresi na kompletním 10letém datasetu
-5. Predikujeme budoucí ceny na základě fundamentálních metrik
+1. Natrénovat ML model na období, kde máme kompletní data (OHLCV + Fundamenty)
+2. Použít tento model k rekonstrukci chybějících fundamentálních dat
+3. Klasifikovat budoucí cenové pohyby na základě kompletního datasetu
+
+### 🎯 Klasifikační Přístup
+
+| Aspekt | Klasifikace |
+|--------|-------------|
+| **Output** | Třída pohybu (DOWN/HOLD/UP) |
+| **Interpretace** | "Cena vzroste/klesne o >3%" |
+| **Praktické využití** | Přímé trading signály |
+| **Robustnost** | Robustní vůči outliers |
+| **Evaluace** | Accuracy, Precision, Recall, F1 |
+
+**Definice tříd (±3% threshold):**
+- **DOWN (0):** Měsíční výnos < -3%
+- **HOLD (1):** Měsíční výnos mezi -3% a +3%
+- **UP (2):** Měsíční výnos > +3%
+
+Threshold 3% odpovídá minimálnímu profitabilnímu pohybu po započtení transakčních nákladů.
 
 ---
 
@@ -43,270 +48,185 @@ Abychom zajistili robustnost a kvalitu modelů, používáme pokročilé valida�
 CleanSolution/
 │
 ├── 📄 README.md                              # Tento soubor
-├── 📄 WORKFLOW.md                            # Detailní průvodce workflow
+├── 📄 QUICKSTART.md                          # Rychlý start pro Colab
 ├── 📄 requirements.txt                       # Python závislosti
 │
+├── 📂 notebooks/                             # 🎯 HLAVNÍ - Jupyter Notebooky pro Google Colab
+│   ├── 01_Data_Collection.ipynb             # Sběr dat (teoretický úvod + stahování)
+│   ├── 02_Train_Fundamental_Predictor.ipynb # RF Regressor pro imputaci
+│   ├── 03_Complete_Historical_Data.ipynb    # Doplnění chybějících dat
+│   ├── 04_Train_Price_Classifier.ipynb      # RF Classifier pro klasifikaci
+│   ├── 05_Hyperparameter_Tuning.ipynb       # Grid Search optimalizace
+│   └── 06_Final_Evaluation.ipynb            # Kompletní evaluace + vizualizace
+│
+├── 📂 scripts/                               # Pomocné Python skripty (pouze API)
+│   ├── 0_download_prices.py                 # Stažení OHLCV dat z yfinance
+│   └── 1_download_fundamentals.py           # Stažení fundamentálních dat
+│
 ├── 📂 data/                                  # Datové soubory
-│   ├── ohlcv_10y/                           # OHLCV data z nadřazeného projektu (symlink)
+│   ├── ohlcv_10y/                           # OHLCV data (10 let)
 │   ├── fundamentals/                        # Fundamentální data (1.5 roku)
-│   ├── complete/                            # Kompletní dataset (10 let)
-│   └── predictions/                         # Výsledky predikcí
+│   ├── complete/                            # Kompletní dataset
+│   └── figures/                             # Generované grafy
 │
-├── 📂 scripts/                               # Python skripty
-│   ├── 1_download_fundamentals.py           # FÁZE 2: Stažení fundamentů
-│   ├── 2_train_fundamental_predictor.py     # FÁZE 3: AI model
-│   ├── 3_complete_historical_data.py        # FÁZE 4: Doplnění dat
-│   └── 4_train_price_predictor.py           # FÁZE 5: Lineární regrese
-│
-├── 📂 notebooks/                             # Jupyter Notebooky pro Google Colab
-│   ├── Part1_DataPreparation_AI.ipynb       # FÁZE 2-3: Data + AI model
-│   └── Part2_PricePrediction.ipynb          # FÁZE 4-5: Predikce cen
+├── 📂 data_10y/                              # Vstupní data (10 let historie)
+│   ├── Technology_full_10y.csv
+│   ├── Consumer_full_10y.csv
+│   └── Industrials_full_10y.csv
 │
 ├── 📂 models/                                # Uložené modely
-│   ├── fundamental_predictor.pkl            # Random Forest model
-│   ├── feature_scaler.pkl                   # StandardScaler pro features
-│   ├── Technology_price_model.pkl           # Ridge modely po sektorech
-│   ├── Consumer_price_model.pkl
-│   └── Industrials_price_model.pkl
+│   ├── fundamental_predictor.pkl            # RF Regressor
+│   ├── fundamental_predictor_tuned.pkl      # Optimalizovaný RF Regressor
+│   ├── rf_classifier_all_sectors.pkl        # RF Classifier
+│   ├── price_classifier_tuned.pkl           # Optimalizovaný RF Classifier
+│   └── optimal_hyperparameters.json         # Nejlepší parametry
 │
-└── 📂 docs/                                  # Dokumentace
-    ├── PHASE_OVERVIEW.md                    # Přehled všech fází
-    ├── RESULTS_ANALYSIS.md                  # Analýza výsledků
-    └── API_REFERENCE.md                     # Dokumentace funkcí
+├── 📂 docs/                                  # Dokumentace
+│   ├── METHODOLOGY.md                       # Detailní metodologie
+│   ├── MATHEMATICAL_FOUNDATIONS.md          # Matematické základy
+│   ├── ALGORITHM_SELECTION.md               # Výběr algoritmů
+│   ├── WORKFLOW.md                          # Průvodce workflow
+│   └── SUMMARY.md                           # Shrnutí projektu
+│
+└── 📂 archive/                               # Archivované staré skripty
+    ├── 2_train_fundamental_predictor.py
+    ├── 3_complete_historical_data.py
+    └── 4_train_price_predictor.py
 ```
 
 ---
 
-## 🚀 Rychlý Start
+## 🚀 Rychlý Start (Google Colab)
 
-### Předpoklady
+### Doporučený Workflow
 
-- Python 3.8+
-- Přístup k internetu (pro stahování dat z yfinance)
-- OHLCV data z nadřazeného projektu (složka `../data_10y/`)
+Všechny ML operace jsou implementovány v **Jupyter Noteboocích** optimalizovaných pro Google Colab.
 
-### Instalace
+**Postup:**
 
-```bash
-# 1. Přejděte do složky CleanSolution
-cd CleanSolution
+1. **Nahrajte data do Google Drive:**
+   ```
+   Google Drive/
+   └── MachineLearning/
+       └── data_10y/
+           ├── Technology_full_10y.csv
+           ├── Consumer_full_10y.csv
+           └── Industrials_full_10y.csv
+   ```
 
-# 2. Nainstalujte závislosti
-pip install -r requirements.txt
+2. **Otevřete notebooky v Google Colab (v pořadí):**
 
-# 3. (Volitelné) Vytvořte symlink na OHLCV data
-# Windows (PowerShell jako admin):
-New-Item -ItemType SymbolicLink -Path "data\ohlcv_10y" -Target "..\data_10y"
+   | # | Notebook | Popis | Doba |
+   |---|----------|-------|------|
+   | 1 | `01_Data_Collection.ipynb` | Teoretický úvod, stahování dat | ~10 min |
+   | 2 | `02_Train_Fundamental_Predictor.ipynb` | Trénink RF Regressor | ~5 min |
+   | 3 | `03_Complete_Historical_Data.ipynb` | Imputace chybějících dat | ~2 min |
+   | 4 | `04_Train_Price_Classifier.ipynb` | Trénink RF Classifier | ~5 min |
+   | 5 | `05_Hyperparameter_Tuning.ipynb` | Optimalizace hyperparametrů | ~15 min |
+   | 6 | `06_Final_Evaluation.ipynb` | Evaluace + grafy pro DP | ~5 min |
 
-# Linux/Mac:
-ln -s ../data_10y data/ohlcv_10y
-```
-
-### Spuštění Pipeline
-
-#### **Varianta A: Python Skripty (lokálně)**
-
-```bash
-# FÁZE 2: Stáhnout fundamentální data (1.5 roku)
-python scripts/1_download_fundamentals.py
-
-# FÁZE 3: Natrénovat AI model (OHLCV → Fundamenty)
-python scripts/2_train_fundamental_predictor.py
-
-# FÁZE 4: Doplnit historická data (2015-2024)
-python scripts/3_complete_historical_data.py
-
-# FÁZE 5: Natrénovat model pro predikci cen
-python scripts/4_train_price_predictor.py
-```
-
-#### **Varianta B: Google Colab Notebooky**
-
-1. **Nahrajte OHLCV data** do Google Drive
-2. Otevřete `notebooks/Part1_DataPreparation_AI.ipynb` v Google Colabu
-3. Spusťte všechny buňky (FÁZE 2-3)
-4. Otevřete `notebooks/Part2_PricePrediction.ipynb` 
-5. Spusťte všechny buňky (FÁZE 4-5)
+3. **Každý notebook obsahuje:**
+   - 📚 Teoretický úvod s akademickými vysvětleními
+   - 📊 Matematické vzorce (LaTeX)
+   - 💻 Spustitelný Python kód
+   - 📈 Vizualizace výsledků
+   - 💾 Automatické ukládání do Google Drive
 
 ---
 
-## 📊 Přehled Fází
+## 📊 Metodologie
 
-### ✅ **FÁZE 1: Sběr OHLCV Dat** (Hotovo v nadřazeném projektu)
-- 10 let měsíčních OHLCV dat (2015-2025)
-- 150 firem z 3 sektorů (Technology, Consumer, Industrials)
-- Technické indikátory: RSI, MACD, SMA, EMA, volatilita, returns
+### Fáze 1: Sběr Dat
+- **OHLCV data:** 10 let měsíční historie (2015-2025) pro 150 S&P 500 akcií
+- **Technické indikátory:** RSI, MACD, SMA, EMA, volatilita
+- **Fundamentální data:** 11 metrik (P/E, ROE, Debt/Equity, atd.)
+- **Sektory:** Technology, Consumer Discretionary, Industrials
 
-### 📥 **FÁZE 2: Stažení Fundamentálních Dat** (1.5 roku)
-**Skript:** `scripts/1_download_fundamentals.py`
+### Fáze 2: Imputace Dat (Random Forest Regressor)
+- **Problém:** Fundamentální data dostupná pouze za 1.5 roku
+- **Řešení:** Multi-output RF natrénovaný na vztahu OHLCV → Fundamenty
+- **Výstup:** Kompletní dataset 2015-2025
 
-**Co stahujeme:**
-- P/E ratio, P/B ratio, P/S ratio, EV/EBITDA, PEG ratio
-- ROE, ROA, Profit Margin, Operating Margin, Gross Margin
-- Debt-to-Equity, Current Ratio, Quick Ratio
-- Revenue Growth YoY, Earnings Growth YoY
+### Fáze 3: Klasifikace (Random Forest Classifier)
+- **Input:** OHLCV + Technické + Fundamentální features
+- **Output:** Ternární klasifikace (DOWN/HOLD/UP)
+- **Validace:** Chronologický split + TimeSeriesSplit
 
-**Období:** 2024-01-01 až 2025-10-01 (~18 měsíců)
-
-**Výstup:** `data/fundamentals/all_sectors_fundamentals.csv`
-
-### 🤖 **FÁZE 3: AI Model pro Predikci Fundamentů**
-**Skript:** `scripts/2_train_fundamental_predictor.py`
-
-**Model:** Multi-output Random Forest Regressor
-
-**Input Features:**
-- OHLCV: open, high, low, close, volume
-- Technické: volatility, returns, RSI, MACD, SMA, EMA
-- Další: dividends, volume_change
-
-**Output (15 targets):**
-- Všechny fundamentální metriky z FÁZE 2
-
-**Metrika úspěchu:** MAE < 15% (relativní chyba)
-
-**Výstup:** `models/fundamental_predictor.pkl`
-
-### 🔮 **FÁZE 4: Doplnění Historických Dat**
-**Skript:** `scripts/3_complete_historical_data.py`
-
-**Proces:**
-1. Načte OHLCV data (2015-2025)
-2. Aplikuje AI model na období 2015-2024 (predikce fundamentů)
-3. Spojí s reálnými fundamenty z 2024-2025
-4. Vytvoří kompletní 10letý dataset
-
-**Výstup:** `data/complete/all_sectors_complete_10y.csv`
-
-### 💰 **FÁZE 5: Lineární Regrese - Predikce Ceny**
-**Skript:** `scripts/4_train_price_predictor.py`
-
-**Model:** Ridge Regression (po sektorech)
-
-**Input Features:**
-- Všechny fundamentální metriky
-- Vybrané technické indikátory
-
-**Output:** `log_price_next_month` (logaritmická cena za měsíc)
-
-**Metrika úspěchu:** MAE < $15 (absolutní chyba v USD)
-
-**Výstupy:**
-- `models/Technology_price_model.pkl`
-- `models/Consumer_price_model.pkl`
-- `models/Industrials_price_model.pkl`
+### Fáze 4: Evaluace
+- Confusion Matrix, ROC křivky
+- Per-sector analýza
+- Backtesting obchodní strategie
+- Feature Importance
 
 ---
 
-## 📈 Očekávané Výsledky
+## 📈 Výsledky
 
-### AI Model (Predikce Fundamentů)
-```
-✅ P/E ratio: MAE < 3.0 bodů
-✅ ROE: MAE < 5%
-✅ Revenue Growth: MAE < 10%
-✅ Celkový průměr: MAE < 15%
-```
+### Klasifikace
 
-### Lineární Regrese (Predikce Ceny)
-```
-✅ Technology: MAE ~$15
-✅ Consumer: MAE ~$11
-✅ Industrials: MAE ~$11
-✅ R² score: >0.75 (vysvětleno 75% variance)
-```
+| Metrika | Hodnota |
+|---------|---------|
+| Accuracy | ~55-60% |
+| F1-Score (weighted) | ~0.55-0.60 |
+| Win Rate (backtest) | ~55-60% |
 
-### Srovnání s Baseline
-```
-Baseline (průměr sektoru): MAE ~$45
-Náš model: MAE ~$12-15
-→ Zlepšení o 67-73%! 🎉
-```
+### Klíčová Zjištění
 
----
-
-## 🔬 Použití Modelů
-
-### Predikce Ceny z Fundamentů
-
-```python
-import pandas as pd
-import numpy as np
-from joblib import load
-
-# 1. Načtení modelu
-model = load('models/Technology_price_model.pkl')
-scaler = load('models/feature_scaler.pkl')
-
-# 2. Příprava vstupních dat
-input_data = pd.DataFrame({
-    'P/E': [28.5],
-    'P/B': [40.2],
-    'P/S': [7.8],
-    'ROE': [0.45],
-    'Revenue_Growth_YoY': [0.12],
-    'Debt_to_Equity': [1.5],
-    # ... další features
-})
-
-# 3. Predikce
-X_scaled = scaler.transform(input_data)
-log_price_pred = model.predict(X_scaled)[0]
-predicted_price = np.exp(log_price_pred)
-
-print(f"Predikovaná cena: ${predicted_price:.2f}")
-```
+- ✅ Random Forest poskytuje robustní klasifikaci
+- ✅ 3% threshold efektivně pokrývá transakční náklady
+- ✅ Fundamentální data zlepšují predikci
+- ✅ TimeSeriesSplit je kritický pro validní evaluaci
+- ✅ Balanced class weights zlepšují recall minoritních tříd
 
 ---
 
 ## 📚 Dokumentace
 
-- **[WORKFLOW.md](docs/WORKFLOW.md)** - Detailní průvodce krok za krokem
-- **[PHASE_OVERVIEW.md](docs/PHASE_OVERVIEW.md)** - Přehled všech fází
-- **[API_REFERENCE.md](docs/API_REFERENCE.md)** - Dokumentace funkcí a tříd
+| Dokument | Obsah |
+|----------|-------|
+| [METHODOLOGY.md](docs/METHODOLOGY.md) | Kompletní metodologie projektu |
+| [MATHEMATICAL_FOUNDATIONS.md](docs/MATHEMATICAL_FOUNDATIONS.md) | Matematické základy algoritmů |
+| [ALGORITHM_SELECTION.md](docs/ALGORITHM_SELECTION.md) | Zdůvodnění výběru algoritmů |
+| [WORKFLOW.md](docs/WORKFLOW.md) | Detailní průvodce workflow |
+| [QUICKSTART.md](QUICKSTART.md) | Rychlý start |
 
 ---
 
-## ⚠️ Důležité Poznámky
+## 🛠️ Lokální Spuštění (Volitelné)
 
-### Datová Omezení
-- **Fundamenty jen 1.5 roku** → AI predikce pro starší data mají vyšší nejistotu
-- **Survivorship bias** → S&P 500 neobsahuje firmy, které vypadly z indexu
-- **Look-ahead bias** → Pozor na použití budoucích dat při trénování
+Pokud preferujete lokální prostředí místo Google Colab:
 
-### Modelová Omezení
-- **AI predikce fundamentů** → Není 100% přesná (~15% chyba)
-- **Linearita** → Vztah fundamenty→cena nemusí být lineární
-- **Externí šoky** → COVID, války, recese nejsou predikované z fundamentů
+```bash
+# 1. Klonujte repozitář
+git clone https://github.com/user/MachineLearning.git
+cd MachineLearning/CleanSolution
 
-### Doporučení
-- ✅ Používejte confidence intervals (bootstrap)
-- ✅ Validujte na různých časových obdobích
-- ✅ Srovnávejte s baseline modely
-- ✅ Nepředpokládejte kauzalitu (pouze korelace)
+# 2. Vytvořte virtuální prostředí
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# nebo: .\venv\Scripts\activate  # Windows
 
----
+# 3. Nainstalujte závislosti
+pip install -r requirements.txt
 
-## 🤝 Přispívání
+# 4. (Volitelné) Stáhněte data
+python scripts/0_download_prices.py
+python scripts/1_download_fundamentals.py
 
-Tento projekt je vyvíjen jako diplomová/bakalářská práce. Feedback a návrhy na vylepšení jsou vítány!
-
----
-
-## 📝 Licence
-
-Tento projekt je určen pro **vzdělávací účely**. Používání pro reálné investiční rozhodnutí je na vlastní riziko.
+# 5. Spusťte Jupyter
+jupyter lab
+```
 
 ---
 
-## 📧 Kontakt
+## 📜 Licence
 
-- **Autor:** Bc. Jan Dub
-- **Datum:** Říjen 2025
-- **Projekt:** Predikce Cen Akcií pomocí ML
+MIT License - viz [LICENSE](../LICENSE)
 
 ---
 
-**Vytvořeno:** 31. října 2025  
-**Verze:** 1.0.0  
-**Status:** 🚧 V implementaci
+## 👤 Autor
+
+**Bc. Jan Dub**  
+Diplomová práce - Ing. Informatika  
+Prosinec 2025

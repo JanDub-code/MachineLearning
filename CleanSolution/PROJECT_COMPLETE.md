@@ -1,10 +1,12 @@
 # 🎉 PROJEKT DOKONČEN - CleanSolution
 
-## ✅ Status: KOMPLETNĚ IMPLEMENTOVÁNO
+## ✅ Status: NOTEBOOKY IMPLEMENTOVÁNY
 
-**Datum:** 31. října 2025  
-**Verze:** 1.0.0  
-**Status:** 🚀 Production Ready
+**Datum:** 31. prosince 2025  
+**Verze:** 2.0.0  
+**Status:** 📓 Notebook Workflow Ready
+
+> **Poznámka:** Modely a data se vygenerují po spuštění notebooků v Google Colab.
 
 ---
 
@@ -47,41 +49,36 @@ CleanSolution/
 
 ## 🎯 Implementované Funkce
 
-### ✅ Python Skripty (4x) - HOTOVO
+### ✅ Jupyter Notebooky (6x) - HLAVNÍ WORKFLOW
 
-| # | Skript | Řádky | Fáze | Status |
-|---|--------|-------|------|--------|
-| 1 | `1_download_fundamentals.py` | 300+ | FÁZE 2 | ✅ |
-| 2 | `2_train_fundamental_predictor.py` | 250+ | FÁZE 3 | ✅ |
-| 3 | `3_complete_historical_data.py` | 220+ | FÁZE 4 | ✅ |
-| 4 | `4_train_price_predictor.py` | 280+ | FÁZE 5 | ✅ |
+| # | Notebook | Popis | Status |
+|---|----------|-------|--------|
+| 1 | `01_Data_Collection.ipynb` | Sběr OHLCV + tech. indikátory | ✅ |
+| 2 | `02_Train_Fundamental_Predictor.ipynb` | RF Regressor pro imputaci | ✅ |
+| 3 | `03_Complete_Historical_Data.ipynb` | Doplnění chybějících dat | ✅ |
+| 4 | `04_Train_Price_Classifier.ipynb` | RF Classifier (DOWN/HOLD/UP) | ✅ |
+| 5 | `05_Hyperparameter_Tuning.ipynb` | Grid Search + TimeSeriesSplit | ✅ |
+| 6 | `06_Final_Evaluation.ipynb` | Evaluace + vizualizace | ✅ |
 
-**Celkem:** ~1,050 řádků Python kódu
+### ✅ Pomocné Skripty (2x) - API
 
-### ✅ Jupyter Notebooky - HOTOVO
+| # | Skript | Popis | Status |
+|---|--------|-------|--------|
+| 0 | `0_download_prices.py` | Stažení OHLCV z yfinance | ✅ |
+| 1 | `1_download_fundamentals.py` | Stažení fundamentů | ✅ |
 
-| Notebook | Buňky | Fáze | Status |
-|----------|-------|------|--------|
-| `Part1_DataPreparation_AI.ipynb` | 20+ | FÁZE 2-3 | ✅ |
+### ✅ Dokumentace (5+ dokumentů) - HOTOVO
 
-### ✅ Dokumentace (7 dokumentů) - HOTOVO
-
-| Dokument | Řádky | Účel | Status |
-|----------|-------|------|--------|
-| `README.md` | 450+ | Hlavní dokumentace | ✅ |
-| `INDEX.md` | 350+ | Index dokumentace | ✅ |
-| `QUICKSTART.md` | 200+ | Rychlý start | ✅ |
-| `docs/WORKFLOW.md` | 650+ | Detailní workflow | ✅ |
-| `docs/SUMMARY.md` | 450+ | Kompletní přehled | ✅ |
-| `requirements.txt` | 20+ | Závislosti | ✅ |
-| `.gitignore` | 40+ | Git ignore | ✅ |
-
-**Celkem:** ~2,160+ řádků dokumentace
-
-### ✅ Automatizační Skripty - HOTOVO
-
-- `run_pipeline.bat` (Windows) ✅
-- `run_pipeline.sh` (Linux/Mac) ✅
+| Dokument | Účel | Status |
+|----------|------|--------|
+| `README.md` | Hlavní dokumentace | ✅ |
+| `INDEX.md` | Index dokumentace | ✅ |
+| `QUICKSTART.md` | Rychlý start | ✅ |
+| `docs/METHODOLOGY.md` | Metodologie | ✅ |
+| `docs/MATHEMATICAL_FOUNDATIONS.md` | Matematické základy | ✅ |
+| `docs/ALGORITHM_SELECTION.md` | Výběr algoritmů | ✅ |
+| `docs/WORKFLOW.md` | Detailní workflow | ✅ |
+| `docs/SUMMARY.md` | Kompletní přehled | ✅ |
 
 ---
 
@@ -91,20 +88,21 @@ CleanSolution/
 
 ```
 📊 Celkové Statistiky:
-   • Python skripty:    ~1,050 řádků
-   • Jupyter notebooks: ~400 řádků
-   • Dokumentace:       ~2,160 řádků
-   • Celkem:           ~3,610 řádků
+   • Jupyter notebooky: 6 (hlavní workflow)
+   • Python skripty:    2 (pomocné API)
+   • Dokumentace:       10+ souborů
+   • Vstupní data:      3 sektory (10 let)
 ```
 
-### Pokrytí Fází
+### Pokrytí Workflow
 
 ```
-✅ FÁZE 1: Sběr OHLCV Dat              (nadřazený projekt)
-✅ FÁZE 2: Fundamentální Data          (Script 1)
-✅ FÁZE 3: AI Model                    (Script 2)
-✅ FÁZE 4: Doplnění Historie           (Script 3)
-✅ FÁZE 5: Predikce Ceny               (Script 4)
+✅ Notebook 01: Sběr OHLCV dat + tech. indikátory
+✅ Notebook 02: RF Regressor (OHLCV → Fundamenty)
+✅ Notebook 03: Imputace chybějících dat
+✅ Notebook 04: RF Classifier (DOWN/HOLD/UP)
+✅ Notebook 05: Hyperparameter Tuning
+✅ Notebook 06: Finální evaluace
 ```
 
 ### Kvalita Kódu
@@ -123,61 +121,57 @@ CleanSolution/
 
 ## 🚀 Jak Spustit
 
-### Windows:
+### Doporučený postup - Google Colab:
 
-```batch
-# Automaticky (doporučeno)
-run_pipeline.bat
+1. Nahrajte data do Google Drive:
+   ```
+   Google Drive/
+   └── MachineLearning/
+       └── data_10y/
+           ├── Technology_full_10y.csv
+           ├── Consumer_full_10y.csv
+           └── Industrials_full_10y.csv
+   ```
 
-# Nebo manuálně
-cd scripts
-python 1_download_fundamentals.py
-python 2_train_fundamental_predictor.py
-python 3_complete_historical_data.py
-python 4_train_price_predictor.py
-```
+2. Otevřete notebooky v Google Colab (v pořadí):
 
-### Linux/Mac:
-
-```bash
-# Automaticky (doporučeno)
-chmod +x run_pipeline.sh
-./run_pipeline.sh
-
-# Nebo manuálně
-cd scripts
-python 1_download_fundamentals.py
-python 2_train_fundamental_predictor.py
-python 3_complete_historical_data.py
-python 4_train_price_predictor.py
-```
-
-### Google Colab:
-
-1. Nahrajte OHLCV data na Google Drive
-2. Otevřete `notebooks/Part1_DataPreparation_AI.ipynb`
-3. Spusťte všechny buňky
+| # | Notebook | Doba |
+|---|----------|------|
+| 1 | `01_Data_Collection.ipynb` | ~10 min |
+| 2 | `02_Train_Fundamental_Predictor.ipynb` | ~5 min |
+| 3 | `03_Complete_Historical_Data.ipynb` | ~2 min |
+| 4 | `04_Train_Price_Classifier.ipynb` | ~5 min |
+| 5 | `05_Hyperparameter_Tuning.ipynb` | ~15 min |
+| 6 | `06_Final_Evaluation.ipynb` | ~5 min |
 
 ---
 
 ## 📈 Očekávané Výsledky
 
-### Po FÁZI 3 (AI Model):
+### Po Notebook 02 (RF Regressor):
 
 ```
-✅ Model natrénován: fundamental_predictor.pkl
-✅ MAE: ~14.2% (cíl: <15%)
-✅ R²: ~0.743 (cíl: >0.70)
-✅ Feature importance analyzována
+✅ Model uložen: models/fundamental_predictor.pkl
+✅ Predikuje 11 fundamentálních metrik z OHLCV
+✅ MAE: ~14-18% (závislé na metrice)
 ```
 
-### Po FÁZI 5 (Predikce Ceny):
+### Po Notebook 04 (RF Classifier):
 
 ```
-✅ 3 modely natrénované (Technology, Consumer, Industrials)
-✅ Průměrná MAE: ~$12.22 (cíl: <$15)
-✅ Průměrná R²: ~0.801 (cíl: >0.75)
-✅ Zlepšení oproti baseline: ~73%
+✅ Model uložen: models/rf_classifier_all_sectors.pkl
+✅ Ternární klasifikace: DOWN/HOLD/UP
+✅ Threshold: ±3%
+✅ Accuracy: ~55-60%
+✅ F1-Score (weighted): ~0.55-0.60
+```
+
+### Po Notebook 05 (Hyperparameter Tuning):
+
+```
+✅ Optimalizované parametry: models/optimal_hyperparameters.json
+✅ TimeSeriesSplit cross-validation
+✅ Grid Search výsledky
 ```
 
 ---
@@ -206,30 +200,29 @@ python 4_train_price_predictor.py
 
 ### 🎯 Inovativní Přístup
 
-- **Hybrid AI + Classical ML** kombinace
+- **Hybridní ML** - RF Regressor pro imputaci + RF Classifier pro klasifikaci
 - **10 let dat** místo běžných 1.5 roku
-- **Sektorová segmentace** pro lepší přesnost
-- **Interpretovatelné koeficienty**
+- **Sektorová segmentace** (Technology, Consumer, Industrials)
+- **Ternární klasifikace** (DOWN/HOLD/UP)
 
 ### 🛠️ Technická Kvalita
 
-- **Modularní design** (4 samostatné skripty)
-- **Error handling** (robustní zpracování chyb)
-- **Progress tracking** (průběžné informace)
-- **Validace** na každém kroku
+- **6 Jupyter notebooků** - kompletní workflow
+- **TimeSeriesSplit** cross-validation
+- **Grid Search** hyperparameter tuning
+- **Google Colab ready**
 - **Cross-platform** (Windows, Linux, Mac)
 
 ### 📚 Dokumentace
 
-- **7 dokumentů** (README, WORKFLOW, atd.)
-- **~2,160 řádků** dokumentace
+- **10+ dokumentů** (README, METHODOLOGY, WORKFLOW, atd.)
+- **Matematické základy** (LaTeX vzorce)
 - **Krok za krokem** návody
-- **Troubleshooting** sekce
-- **Příklady použití**
+- **Akademická úroveň** pro diplomovou práci
 
 ### 🚀 Použitelnost
 
-- **Google Colab ready** (Part1 notebook)
+- **Google Colab ready** (6 notebooků)
 - **Auto-run skripty** (.bat, .sh)
 - **Minimal setup** (jen pip install)
 - **Rate limiting** (respektuje yfinance limity)
@@ -238,39 +231,38 @@ python 4_train_price_predictor.py
 
 ## 🎉 Závěr
 
-**CleanSolution je kompletně implementované, otestované a připravené k použití řešení pro predikci cen akcií pomocí AI a lineární regrese.**
+**CleanSolution je kompletně implementované řešení pro klasifikaci cenových pohybů akcií pomocí Random Forest.**
 
 ### Co máte k dispozici:
 
-✅ 4 Python skripty pokrývající celý pipeline (FÁZE 2-5)  
-✅ 1 Google Colab Notebook pro FÁZE 2-3  
-✅ 7 dokumentačních souborů s detailními návody  
+✅ 6 Jupyter notebooků pokrývajících celý workflow  
+✅ 2 pomocné Python skripty pro API  
+✅ 10+ dokumentačních souborů s detailními návody  
+✅ Vstupní data za 10 let (3 sektory)  
 ✅ Automatizační skripty pro Windows i Linux/Mac  
-✅ Kompletní requirements.txt se závislostmi  
-✅ .gitignore pro verzování projektu
+✅ Kompletní requirements.txt se závislostmi
 
 ### Další kroky:
 
-1. **Přečtěte si [QUICKSTART.md](QUICKSTART.md)**
-2. **Spusťte pipeline** pomocí `run_pipeline.bat/.sh`
-3. **Experimentujte** s hyperparametry
-4. **Analyzujte** výsledky v `data/analysis/`
-5. **Sdílejte** své výsledky!
+1. **Nahrajte data do Google Drive**
+2. **Spusťte notebooky 01-06** v pořadí
+3. **Analyzujte** výsledky v `06_Final_Evaluation.ipynb`
+4. **Exportujte** grafy pro diplomovou práci
 
 ---
 
 ## 📧 Kontakt
 
 **Autor:** Bc. Jan Dub  
-**Datum:** 31. října 2025  
-**Projekt:** Predikce Cen Akcií pomocí ML
+**Datum:** 31. prosince 2025  
+**Projekt:** Klasifikace Cenových Pohybů Akcií pomocí ML
 
 ---
 
 **🚀 Hodně štěstí s vaším projektem!**
 
 *Vytvořeno s ❤️ pomocí GitHub Copilot*  
-*CleanSolution v1.0.0 - Production Ready* ✅
+*CleanSolution v2.0.0 - Notebook Workflow* ✅
 
 ---
 
@@ -279,18 +271,24 @@ python 4_train_price_predictor.py
 - [x] README.md vytvořen
 - [x] QUICKSTART.md vytvořen
 - [x] INDEX.md vytvořen
+- [x] CRITICAL_TASKS.md aktualizován
 - [x] requirements.txt vytvořen
-- [x] Skript 1: download_fundamentals.py
-- [x] Skript 2: train_fundamental_predictor.py
-- [x] Skript 3: complete_historical_data.py
-- [x] Skript 4: train_price_predictor.py
-- [x] Notebook: Part1_DataPreparation_AI.ipynb
-- [x] WORKFLOW.md dokumentace
-- [x] SUMMARY.md dokumentace
+- [x] Notebook 01: Data Collection
+- [x] Notebook 02: Train Fundamental Predictor
+- [x] Notebook 03: Complete Historical Data
+- [x] Notebook 04: Train Price Classifier
+- [x] Notebook 05: Hyperparameter Tuning
+- [x] Notebook 06: Final Evaluation
+- [x] Script: 0_download_prices.py
+- [x] Script: 1_download_fundamentals.py
+- [x] docs/METHODOLOGY.md
+- [x] docs/MATHEMATICAL_FOUNDATIONS.md
+- [x] docs/ALGORITHM_SELECTION.md
+- [x] docs/WORKFLOW.md
+- [x] docs/SUMMARY.md
 - [x] run_pipeline.bat
 - [x] run_pipeline.sh
-- [x] .gitignore
-- [x] .gitkeep soubory
 - [x] Struktura složek vytvořena
+- [ ] Spuštění notebooků (vygenerování modelů/dat)
 
-**Status: 100% DOKONČENO** ✅
+**Status: NOTEBOOKY HOTOVY - Čeká na spuštění** ⏳

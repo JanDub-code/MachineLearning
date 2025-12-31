@@ -1,6 +1,6 @@
 # 🎯 CleanSolution - Index Dokumentace
 
-Vítejte v **CleanSolution** - kompletním řešení pro predikci cen akcií pomocí AI a lineární regrese!
+Vítejte v **CleanSolution** - kompletním řešení pro klasifikaci cenových pohybů akcií pomocí Random Forest!
 
 ---
 
@@ -33,29 +33,42 @@ CleanSolution/
 ├── 📄 INDEX.md                     ← Tento soubor
 ├── 📄 requirements.txt             ← Python závislosti
 │
-├── 📂 scripts/                     ← Python skripty (FÁZE 2-5)
-│   ├── 1_download_fundamentals.py
-│   ├── 2_train_fundamental_predictor.py
-│   ├── 3_complete_historical_data.py
-│   └── 4_train_price_predictor.py
+├── 📂 notebooks/                   ← 🎯 HLAVNÍ - Jupyter Notebooky pro Google Colab
+│   ├── 01_Data_Collection.ipynb             # Sběr dat
+│   ├── 02_Train_Fundamental_Predictor.ipynb # RF Regressor
+│   ├── 03_Complete_Historical_Data.ipynb    # Imputace dat
+│   ├── 04_Train_Price_Classifier.ipynb      # RF Classifier
+│   ├── 05_Hyperparameter_Tuning.ipynb       # Grid Search
+│   └── 06_Final_Evaluation.ipynb            # Evaluace
 │
-├── 📂 notebooks/                   ← Jupyter notebooky pro Google Colab
-│   ├── Part1_DataPreparation_AI.ipynb
-│   └── Part2_PricePrediction.ipynb
+├── 📂 scripts/                     ← Pomocné Python skripty (API)
+│   ├── 0_download_prices.py                 # Stažení OHLCV
+│   └── 1_download_fundamentals.py           # Stažení fundamentů
 │
-├── 📂 data/                        ← Datové soubory (vytvořené)
+├── 📂 data/                        ← Datové soubory (generované)
+│   ├── ohlcv/
 │   ├── fundamentals/
 │   ├── complete/
-│   └── analysis/
+│   └── figures/
 │
-├── 📂 models/                      ← ML modely (vytvořené)
+├── 📂 data_10y/                    ← Vstupní data (10 let)
+│   ├── Technology_full_10y.csv
+│   ├── Consumer_full_10y.csv
+│   └── Industrials_full_10y.csv
+│
+├── 📂 models/                      ← ML modely (generované)
 │   ├── fundamental_predictor.pkl
-│   ├── *_price_model.pkl
-│   └── *_scaler.pkl
+│   ├── rf_classifier_all_sectors.pkl
+│   └── optimal_hyperparameters.json
 │
-└── 📂 docs/                        ← Dokumentace
-    ├── WORKFLOW.md
-    └── SUMMARY.md
+├── 📂 docs/                        ← Dokumentace
+│   ├── METHODOLOGY.md
+│   ├── MATHEMATICAL_FOUNDATIONS.md
+│   ├── ALGORITHM_SELECTION.md
+│   ├── WORKFLOW.md
+│   └── SUMMARY.md
+│
+└── 📂 archive/                     ← Archivované staré skripty
 ```
 
 ---
@@ -66,43 +79,46 @@ CleanSolution/
 
 1. ✅ **[QUICKSTART.md](QUICKSTART.md)** - Rychlé spuštění za 5 minut
 2. ✅ **[README.md](README.md)** - Pochopení projektu
-3. ✅ Spusťte skripty podle QUICKSTART
+3. ✅ Spusťte notebooky 01-06 v Google Colab
 4. ✅ **[docs/WORKFLOW.md](docs/WORKFLOW.md)** - Detailní pochopení
 
 ### Pro Pokročilé:
 
 1. ✅ **[README.md](README.md)** - Přehled
 2. ✅ **[docs/WORKFLOW.md](docs/WORKFLOW.md)** - Detailní workflow
-3. ✅ Prozkoumejte skripty v `scripts/`
+3. ✅ Prozkoumejte notebooky v `notebooks/`
 4. ✅ **[docs/SUMMARY.md](docs/SUMMARY.md)** - Kompletní reference
 
 ### Pro Google Colab:
 
-1. ✅ **[README.md](README.md)** - Sekce "Google Colab Notebooky"
-2. ✅ Otevřete `notebooks/Part1_DataPreparation_AI.ipynb`
-3. ✅ Následujte instrukce v notebooku
+1. ✅ **[README.md](README.md)** - Sekce "Rychlý Start"
+2. ✅ Otevřete `notebooks/01_Data_Collection.ipynb`
+3. ✅ Spusťte všechny notebooky v pořadí 01-06
 
 ---
 
 ## 🚀 Rychlý Start (TL;DR)
 
-```bash
-# 1. Instalace
-pip install -r requirements.txt
+**Doporučený postup - Google Colab:**
 
-# 2. Spuštění (v CleanSolution/scripts/)
-python 1_download_fundamentals.py
-python 2_train_fundamental_predictor.py
-python 3_complete_historical_data.py
-python 4_train_price_predictor.py
+1. Nahrajte data do Google Drive (`MachineLearning/data_10y/`)
+2. Otevřete notebooky v Colab (v pořadí):
 
-# 3. Výsledky v:
-# - models/ (natrénované modely)
-# - data/complete/ (kompletní dataset)
-# - data/analysis/ (metriky a vizualizace)
-```
+| # | Notebook | Popis | Čas |
+|---|----------|-------|-----|
+| 1 | `01_Data_Collection.ipynb` | Sběr dat | ~10 min |
+| 2 | `02_Train_Fundamental_Predictor.ipynb` | RF Regressor | ~5 min |
+| 3 | `03_Complete_Historical_Data.ipynb` | Imputace dat | ~2 min |
+| 4 | `04_Train_Price_Classifier.ipynb` | RF Classifier | ~5 min |
+| 5 | `05_Hyperparameter_Tuning.ipynb` | Grid Search | ~15 min |
+| 6 | `06_Final_Evaluation.ipynb` | Evaluace | ~5 min |
 
-**Očekávaný čas:** 45-90 minut
+**Výsledky:**
+- `models/` - natrénované modely
+- `data/complete/` - kompletní dataset
+- `data/figures/` - vizualizace
+
+**Očekávaný čas:** ~45 minut
 
 ---
 
@@ -115,67 +131,71 @@ python 4_train_price_predictor.py
 ### Řešení:
 
 ```
-FÁZE 1: OHLCV Data (10 let)                    ✅ Hotovo
+📓 01: Sběr OHLCV dat + tech. indikátory      ✅ Notebook 01
           ↓
-FÁZE 2: Fundamenty (1.5 roku)                  📥 Script 1
+📓 02: RF Regressor (OHLCV → Fundamenty)      🤖 Notebook 02
           ↓
-FÁZE 3: AI Model (OHLCV → Fundamenty)         🤖 Script 2
+📓 03: Imputace chybějících fundamentů        🔮 Notebook 03
           ↓
-FÁZE 4: Doplnění Historie (2015-2024)         🔮 Script 3
+📓 04: RF Classifier (DOWN/HOLD/UP)           📊 Notebook 04
           ↓
-FÁZE 5: Predikce Ceny (Fundamenty → $)        💰 Script 4
+📓 05: Hyperparameter Tuning                  🎛️ Notebook 05
+          ↓
+📓 06: Finální evaluace + vizualizace         📈 Notebook 06
 ```
 
 ### Výsledek:
 
-- ✅ AI model s **~14% MAE** pro predikci fundamentů
-- ✅ Predikční model s **~$12 MAE** a **~0.80 R²** pro ceny
+- ✅ RF Regressor pro imputaci fundamentálních dat
+- ✅ RF Classifier pro ternární klasifikaci (DOWN/HOLD/UP)
 - ✅ Kompletní 10letý dataset připravený k analýze
-- ✅ Interpretovatelné koeficienty (které faktory ovlivňují cenu)
+- ✅ Accuracy ~55-60%, F1-Score ~0.55-0.60
 
 ---
 
 ## 🛠️ Dostupné Nástroje
 
-### Python Skripty (lokálně)
+### Jupyter Notebooky (Google Colab) - HLAVNÍ WORKFLOW
 
-| Skript | Fáze | Čas | Výstup |
-|--------|------|-----|--------|
-| `1_download_fundamentals.py` | FÁZE 2 | ~30-45 min | Fundamentální data |
-| `2_train_fundamental_predictor.py` | FÁZE 3 | ~5-10 min | AI model |
-| `3_complete_historical_data.py` | FÁZE 4 | ~5-10 min | Kompletní dataset |
-| `4_train_price_predictor.py` | FÁZE 5 | ~5-10 min | Predikční modely |
+| Notebook | Popis | Čas |
+|----------|-------|-----|
+| `01_Data_Collection.ipynb` | Sběr dat + technické indikátory | ~10 min |
+| `02_Train_Fundamental_Predictor.ipynb` | RF Regressor pro imputaci | ~5 min |
+| `03_Complete_Historical_Data.ipynb` | Doplnění chybějících dat | ~2 min |
+| `04_Train_Price_Classifier.ipynb` | RF Classifier (DOWN/HOLD/UP) | ~5 min |
+| `05_Hyperparameter_Tuning.ipynb` | Grid Search optimalizace | ~15 min |
+| `06_Final_Evaluation.ipynb` | Evaluace + grafy pro DP | ~5 min |
 
-### Jupyter Notebooky (Google Colab)
+### Pomocné Python Skripty (API)
 
-| Notebook | Fáze | Popis |
-|----------|------|-------|
-| `Part1_DataPreparation_AI.ipynb` | FÁZE 2-3 | Data + AI model |
-| `Part2_PricePrediction.ipynb` | FÁZE 4-5 | Predikce cen |
+| Skript | Popis |
+|--------|-------|
+| `0_download_prices.py` | Stažení OHLCV dat z yfinance |
+| `1_download_fundamentals.py` | Stažení fundamentálních dat |
 
 ---
 
 ## 📈 Očekávané Výsledky
 
-### AI Model (FÁZE 3):
+### RF Regressor (Imputace fundamentů):
 ```
-✅ MAE:  14.2%  (cíl: <15%)
-✅ R²:   0.743  (cíl: >0.70)
-```
-
-### Predikční Model (FÁZE 5):
-```
-✅ Technology:   MAE = $14.23,  R² = 0.781
-✅ Consumer:     MAE = $10.54,  R² = 0.823
-✅ Industrials:  MAE = $11.89,  R² = 0.798
-
-✅ Průměr:       MAE = $12.22,  R² = 0.801
+✅ Predikuje 11 fundamentálních metrik z OHLCV
+✅ MAE: ~14-18% (závislé na metrice)
+✅ R²: ~0.70-0.85
 ```
 
-**Srovnání s Baseline:**
-- Baseline (průměr sektoru): MAE ~$45
-- Náš model: MAE ~$12
-- **→ Zlepšení o 73%!** 🎉
+### RF Classifier (Klasifikace pohybů):
+```
+✅ Ternární klasifikace: DOWN/HOLD/UP
+✅ Threshold: ±3% (pokrývá transakční náklady)
+✅ Accuracy: ~55-60%
+✅ F1-Score (weighted): ~0.55-0.60
+```
+
+**Definice tříd:**
+- DOWN (0): Měsíční výnos < -3%
+- HOLD (1): Výnos mezi -3% a +3%
+- UP (2): Měsíční výnos > +3%
 
 ---
 
@@ -261,9 +281,9 @@ Používání pro reálné investiční rozhodnutí je **na vlastní riziko**.
 
 ## 📅 Verze
 
-**Verze:** 1.0.0  
-**Datum:** 31. října 2025  
-**Status:** Production Ready ✅
+**Verze:** 2.0.0  
+**Datum:** 31. prosince 2025  
+**Status:** Notebook Workflow ✅
 
 ---
 

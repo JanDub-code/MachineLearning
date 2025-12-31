@@ -1,18 +1,18 @@
 # 🤖 AGENT CONTEXT - CleanSolution
 
 > **Účel:** Kritický kontext pro AI agenty. Tento soubor je STRUČNÝ a odkazuje na detailní dokumentaci.  
-> **Poslední update:** 1. listopadu 2025  
-> **Status:** Production Ready ✅
+> **Poslední update:** 31. prosince 2025  
+> **Status:** Notebook Workflow Ready ✅
 
 ---
 
 ## 🎯 Co Je Tento Projekt?
 
-**Hybrid AI/ML pipeline pro predikci cen akcií:**
-- Random Forest AI → predikuje fundamentals z OHLCV (řeší problém chybějících 8.5 let dat)
-- Ridge Regression → predikuje ceny z fundamentals
+**Hybrid ML pipeline pro klasifikaci cenových pohybů akcií:**
+- Random Forest Regressor → predikuje fundamentals z OHLCV (řeší problém chybějících 8.5 let dat)
+- Random Forest Classifier → klasifikuje směr cenových pohybů (DOWN/HOLD/UP)
 
-**Kontext:** Parent projekt má 10 let OHLCV dat, ale fundamentals existují jen 1.5 roku. AI nám doplní historii.
+**Kontext:** Parent projekt má 10 let OHLCV dat, ale fundamentals existují jen 1.5 roku. ML nám doplní historii.
 
 ---
 
@@ -33,15 +33,20 @@
 
 ---
 
-## 🏗️ Pipeline Overview (5 Fází)
+## 🏗️ Pipeline Overview (6 Notebooků)
 
 ```
-FÁZE 1: OHLCV Data → [Parent projekt: data_10y/]
-FÁZE 2: Download Fundamentals → scripts/1_download_fundamentals.py
-FÁZE 3: Train AI Model → scripts/2_train_fundamental_predictor.py
-FÁZE 4: Complete History → scripts/3_complete_historical_data.py
-FÁZE 5: Train Price Predictor → scripts/4_train_price_predictor.py
+📓 01: Data Collection        → notebooks/01_Data_Collection.ipynb
+📓 02: RF Regressor           → notebooks/02_Train_Fundamental_Predictor.ipynb
+📓 03: Imputace dat           → notebooks/03_Complete_Historical_Data.ipynb
+📓 04: RF Classifier          → notebooks/04_Train_Price_Classifier.ipynb
+📓 05: Hyperparameter Tuning  → notebooks/05_Hyperparameter_Tuning.ipynb
+📓 06: Evaluace               → notebooks/06_Final_Evaluation.ipynb
 ```
+
+**Pomocné skripty (API):**
+- `scripts/0_download_prices.py` - Stažení OHLCV
+- `scripts/1_download_fundamentals.py` - Stažení fundamentů
 
 **Detaily každé fáze:** Viz [docs/WORKFLOW.md](docs/WORKFLOW.md)
 
@@ -51,13 +56,15 @@ FÁZE 5: Train Price Predictor → scripts/4_train_price_predictor.py
 
 ```
 CleanSolution/
-├── scripts/               # 4 Python skripty (FÁZE 2-5)
-├── notebooks/             # Google Colab ready (Part1 = FÁZE 2-3)
-├── data/                  # Outputs z pipeline
-│   ├── fundamentals/      # FÁZE 2 output
-│   ├── complete/          # FÁZE 4 output
-│   └── analysis/          # FÁZE 5 visualizations
-├── models/                # Pkl files (RF + Ridge + Scaler)
+├── notebooks/             # 6 Jupyter notebooků (HLAVNÍ WORKFLOW)
+├── scripts/               # 2 pomocné Python skripty (API)
+├── data_10y/              # Vstupní data (10 let)
+├── data/                  # Výstupy z pipeline (generované)
+│   ├── ohlcv/
+│   ├── fundamentals/
+│   ├── complete/
+│   └── figures/
+├── models/                # Pkl files (generované)
 └── docs/                  # Detailní dokumentace
 ```
 
@@ -85,13 +92,12 @@ CleanSolution/
 
 ### Spustit Pipeline
 
-```bash
-# Automaticky (doporučeno):
-run_pipeline.bat  # Windows
-./run_pipeline.sh  # Linux/Mac
+**Doporučený postup - Google Colab:**
+1. Nahrajte data do Google Drive
+2. Spusťte notebooky 01-06 v pořadí
+3. Výsledky v `models/` a `data/`
 
-# Manuálně viz: QUICKSTART.md
-```
+**Detaily viz:** [QUICKSTART.md](QUICKSTART.md)
 
 ### Debugovat Problém
 

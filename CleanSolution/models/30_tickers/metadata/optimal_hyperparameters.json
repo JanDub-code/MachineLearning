@@ -1,0 +1,12 @@
+{
+  "best_params": {
+    "class_weight": "balanced",
+    "max_depth": 10,
+    "min_samples_leaf": 2,
+    "min_samples_split": 5,
+    "n_estimators": 100
+  },
+  "cv_score": 0.36761360081472944,
+  "test_accuracy": 0.3208955223880597,
+  "test_f1": 0.3100150583244249
+}

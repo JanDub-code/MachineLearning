@@ -48,51 +48,92 @@ Threshold 3% odpovídá minimálnímu profitabilnímu pohybu po započtení tran
 CleanSolution/
 │
 ├── 📄 README.md                              # Tento soubor
+├── 📄 DOKUMENTACE_30tickeru_3sektory_postup.md  # 📊 HLAVNÍ DOKUMENTACE experimentu
 ├── 📄 QUICKSTART.md                          # Rychlý start pro Colab
 ├── 📄 requirements.txt                       # Python závislosti
 │
-├── 📂 notebooks/                             # 🎯 HLAVNÍ - Jupyter Notebooky pro Google Colab
-│   ├── 01_Data_Collection.ipynb             # Sběr dat (teoretický úvod + stahování)
-│   ├── 02_Train_Fundamental_Predictor.ipynb # RF Regressor pro imputaci
-│   ├── 03_Complete_Historical_Data.ipynb    # Doplnění chybějících dat
-│   ├── 04_Train_Price_Classifier.ipynb      # RF Classifier pro klasifikaci
-│   ├── 05_Hyperparameter_Tuning.ipynb       # Grid Search optimalizace
-│   └── 06_Final_Evaluation.ipynb            # Kompletní evaluace + vizualizace
+├── 📂 notebooks/                             # Jupyter Notebooky pro Google Colab
+│   └── ...
 │
-├── 📂 scripts/                               # Pomocné Python skripty (pouze API)
-│   ├── 0_download_prices.py                 # Stažení OHLCV dat z yfinance
-│   └── 1_download_fundamentals.py           # Stažení fundamentálních dat
+├── 📂 scripts/                               # Pomocné Python skripty
+│   └── ...
 │
-├── 📂 data/                                  # Datové soubory
-│   ├── ohlcv_10y/                           # OHLCV data (10 let)
-│   ├── fundamentals/                        # Fundamentální data (1.5 roku)
-│   ├── complete/                            # Kompletní dataset
-│   └── figures/                             # Generované grafy
+├── 📂 data/                                  # 📊 DATOVÉ SOUBORY
+│   │
+│   └── 📂 30_tickers/                       # 🎯 EXPERIMENT: 30 tickerů (10 per sektor)
+│       ├── 📂 ohlcv/                        # Surová OHLCV data
+│       ├── 📂 fundamentals/                 # Fundamentální data
+│       ├── 📂 complete/                     # Kompletní dataset
+│       └── 📂 figures/                      # Vizualizace výsledků
+│   
+│   # Budoucí experimenty:
+│   # ├── 📂 50_tickers/
+│   # ├── 📂 100_tickers/
+│   # └── 📂 150_tickers/
 │
-├── 📂 data_10y/                              # Vstupní data (10 let historie)
-│   ├── Technology_full_10y.csv
-│   ├── Consumer_full_10y.csv
-│   └── Industrials_full_10y.csv
-│
-├── 📂 models/                                # Uložené modely
-│   ├── fundamental_predictor.pkl            # RF Regressor
-│   ├── fundamental_predictor_tuned.pkl      # Optimalizovaný RF Regressor
-│   ├── rf_classifier_all_sectors.pkl        # RF Classifier
-│   ├── price_classifier_tuned.pkl           # Optimalizovaný RF Classifier
-│   └── optimal_hyperparameters.json         # Nejlepší parametry
+├── 📂 models/                                # 🤖 ULOŽENÉ ML MODELY
+│   │
+│   └── 📂 30_tickers/                       # 🎯 MODELY: 30 tickerů
+│       ├── 📂 classifiers/                  # RF Classifier modely
+│       ├── 📂 regressors/                   # RF Regressor modely
+│       ├── 📂 scalers/                      # StandardScaler objekty
+│       └── 📂 metadata/                     # Výsledky a hyperparametry
+│   
+│   # Budoucí experimenty:
+│   # ├── 📂 50_tickers/
+│   # ├── 📂 100_tickers/
+│   # └── 📂 150_tickers/
 │
 ├── 📂 docs/                                  # Dokumentace
-│   ├── METHODOLOGY.md                       # Detailní metodologie
-│   ├── MATHEMATICAL_FOUNDATIONS.md          # Matematické základy
-│   ├── ALGORITHM_SELECTION.md               # Výběr algoritmů
-│   ├── WORKFLOW.md                          # Průvodce workflow
-│   └── SUMMARY.md                           # Shrnutí projektu
+│   └── ...
 │
-└── 📂 archive/                               # Archivované staré skripty
-    ├── 2_train_fundamental_predictor.py
-    ├── 3_complete_historical_data.py
-    └── 4_train_price_predictor.py
+├── 📂 archive/                               # Archivované staré skripty
+│   └── ...
+│
+└── 📄 Skripty pro pipeline:
+    ├── download_30_tickers.py
+    ├── download_fundamentals.py
+    ├── train_rf_regressor.py
+    ├── train_rf_classifier.py
+    ├── hyperparameter_tuning.py
+    └── final_evaluation.py
 ```
+
+### 📁 Proč podsložky `30_tickers/`?
+
+Struktura umožňuje **snadné porovnání experimentů** s různým počtem tickerů:
+
+| Experiment | Tickerů | Accuracy | Složka |
+|------------|---------|----------|--------|
+| 30 tickerů | 30 | 32.1% | `data/30_tickers/`, `models/30_tickers/` |
+| 50 tickerů | 50 | ? | `data/50_tickers/`, `models/50_tickers/` |
+| 100 tickerů | 100 | ? | `data/100_tickers/`, `models/100_tickers/` |
+
+### 📁 Popis klíčových složek
+├── 📂 archive/                               # Archivované staré skripty
+│   └── ...
+│
+└── 📄 Skripty pro pipeline (30 tickerů):
+    ├── download_30_tickers.py               # Krok 1: Stažení OHLCV
+    ├── download_fundamentals.py             # Krok 2: Stažení fundamentů
+    ├── train_rf_regressor.py                # Krok 3-4: RF Regressor + imputace
+    ├── train_rf_classifier.py               # Krok 5: RF Classifier
+    ├── hyperparameter_tuning.py             # Krok 6: Grid Search tuning
+    └── final_evaluation.py                  # Krok 7: Evaluace + grafy
+```
+
+### 📁 Popis klíčových složek
+
+| Složka | Účel | Obsah |
+|--------|------|-------|
+| `data/30_tickers/ohlcv/` | Surová cenová data | OHLCV z yfinance |
+| `data/30_tickers/fundamentals/` | Fundamentální metriky | P/E, ROE, ROA, atd. |
+| `data/30_tickers/complete/` | **Kompletní dataset** | OHLCV + fundamenty (imputované) |
+| `data/30_tickers/figures/` | **Vizualizace** | Grafy pro diplomovou práci |
+| `models/30_tickers/classifiers/` | Klasifikátory | RF Classifier modely (.pkl) |
+| `models/30_tickers/regressors/` | Regresory | RF Regressor pro imputaci |
+| `models/30_tickers/scalers/` | Scalery | StandardScaler objekty |
+| `models/30_tickers/metadata/` | Metadata | JSON/CSV s výsledky |
 
 ---
 
@@ -160,23 +201,70 @@ Všechny ML operace jsou implementovány v **Jupyter Noteboocích** optimalizova
 
 ---
 
-## 📈 Výsledky
+## 📈 Výsledky (30 tickerů, 3 sektory)
 
-### Klasifikace
+### Experiment: Prosinec 2025
+
+📊 **Kompletní dokumentace:** [DOKUMENTACE_30tickeru_3sektory_postup.md](DOKUMENTACE_30tickeru_3sektory_postup.md)
+
+### Dataset
 
 | Metrika | Hodnota |
 |---------|---------|
-| Accuracy | ~55-60% |
-| F1-Score (weighted) | ~0.55-0.60 |
-| Win Rate (backtest) | ~55-60% |
+| Tickerů | 30 (10 per sektor) |
+| Období | 10.7 let (2014-2024) |
+| Celkem vzorků | 3,380 |
+| Features | 29 (OHLCV + technické + fundamenty) |
+
+### RF Regressor (imputace fundamentů)
+
+| Target | R² Score |
+|--------|----------|
+| trailingPE | 0.957 |
+| forwardPE | 0.964 |
+| returnOnAssets | 0.970 |
+| debtToEquity | 0.765 |
+
+### RF Classifier (klasifikace pohybů)
+
+| Metrika | Hodnota |
+|---------|---------|
+| Accuracy | 32.1% |
+| F1-Score | 31.0% |
+| Random baseline | 33.3% |
+
+### Per-Sector výsledky
+
+| Sektor | Accuracy | F1-Score |
+|--------|----------|----------|
+| Industrials | **35.9%** | 34.6% |
+| Consumer | 30.4% | 29.8% |
+| Technology | 29.8% | 27.6% |
+
+### Top 5 Features
+
+1. `returns` (0.058)
+2. `volatility` (0.056)
+3. `macd_hist` (0.049)
+4. `macd_signal` (0.048)
+5. `volume_change` (0.045)
+
+### Vizualizace
+
+| Graf | Popis |
+|------|-------|
+| ![Confusion Matrix](data/30_tickers/figures/confusion_matrix.png) | Matice záměn |
+| ![ROC Curves](data/30_tickers/figures/roc_curves.png) | ROC křivky |
+| ![Feature Importance](data/30_tickers/figures/feature_importance.png) | Důležitost features |
+| ![Sector Comparison](data/30_tickers/figures/sector_comparison.png) | Porovnání sektorů |
 
 ### Klíčová Zjištění
 
-- ✅ Random Forest poskytuje robustní klasifikaci
-- ✅ 3% threshold efektivně pokrývá transakční náklady
-- ✅ Fundamentální data zlepšují predikci
-- ✅ TimeSeriesSplit je kritický pro validní evaluaci
-- ✅ Balanced class weights zlepšují recall minoritních tříd
+- ✅ RF Regressor excelentně imputuje fundamenty (R² 0.76-0.97)
+- ✅ Technické indikátory (returns, volatility, MACD) jsou nejdůležitější
+- ✅ Industrials sektor je nejlépe predikovatelný
+- ⚠️ Accuracy ~32% je typická pro finanční predikce (mírně nad random)
+- ⚠️ HOLD třída je nejhůře rozpoznávaná (20% recall)
 
 ---
 

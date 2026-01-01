@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-01-01T00:56:54.982246",
+  "best_params": {
+    "class_weight": "balanced",
+    "max_depth": 10,
+    "min_samples_leaf": 4,
+    "min_samples_split": 5,
+    "n_estimators": 200
+  },
+  "best_cv_score": 0.3803908698173436,
+  "test_accuracy": 0.3564148681055156,
+  "test_f1": 0.35846969402693607,
+  "n_cv_splits": 5
+}

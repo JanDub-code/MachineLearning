@@ -31,7 +31,7 @@ ENV/
 *.ipynb_checkpoints
 
 # Data files (large CSVs)
-data/**/*.csv
+#data/**/*.csv
 !data/**/.gitkeep
 
 # Models (large pkl files)
@@ -39,8 +39,8 @@ models/**/*.pkl
 !models/.gitkeep
 
 # Analysis outputs
-data/analysis/**/*.png
-data/analysis/**/*.csv
+#data/analysis/**/*.png
+#data/analysis/**/*.csv
 !data/analysis/.gitkeep
 
 # IDE
@@ -60,3 +60,4 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+

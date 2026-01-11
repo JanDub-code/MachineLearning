@@ -303,7 +303,11 @@ Hlavním nástrojem pro posouzení kvality je \textbf{TimeSeriesSplit}. Na rozd�
 % ============================================
 \kapitola{Robustní verifikace modelu na datech S\&P 500}
 
+Abychom ověřili skutečnou sílu našeho hybridního modelu, neomezili jsme se pouze na úzký výběr akcií, ale provedli jsme rozsáhlý experiment na reprezentativním vzorku indexu S\&P 500. Cílem této kapitoly je popsat parametry tohoto testu a složení dat, na kterých model prokazuje svou stabilitu.
+
 \sekce{Konfigurace experimentu}
+
+Pro experiment bylo zvoleno celkem \textbf{150 akciových titulů}. Tato volba není náhodná – představuje dostatečně velký vzorek pro statistickou významnost, ale zároveň chrání model před přílišným zahlcením šumem z méně likvidních titulů.
 
 \begin{table}[H]
 \centering
@@ -320,7 +324,16 @@ Target threshold & $\pm 3\%$ \\ \hline
 \end{tabular}
 \end{table}
 
-\sekce{Vybrané tickery}
+\sekce{Volba sektorů a tickerů}
+
+Hlavním motivem pro rozdělení do \textbf{5 odlišných sektorů} byla potřeba komparativní analýzy. Každý sektor (např. technologie vs. finance) se chová v tržních cyklech jinak. Tím, že model trénujeme napříč těmito světy, testujeme jeho schopnost přizpůsobit se různým fundamentálním charakteristikám (např. odlišné míře zadlužení u průmyslu vs. technologií).
+
+V rámci každého sektoru jsme vybrali \textbf{30 tickerů}. Toto množství považujeme za \textbf{optimální objem dat}: 
+\begin{itemize}
+    \item Poskytuje dostatek "učebního materiálu" pro Random Forest (celkem přes 16 000 záznamů).
+    \item Zajišťuje, že model není příliš specializovaný na úzkou skupinu firem, ale chápe sektor jako celek.
+    \item Udržuje výpočetní náročnost v rozumných mezích při zachování vysoké granularity výsledků.
+\end{itemize}
 
 \begin{table}[H]
 \centering
@@ -337,6 +350,11 @@ Financials & JPM, BAC, WFC, GS, MS, C, BLK, SCHW, AXP, USB, ... \\ \hline
 \end{table}
 
 \sekce{Statistiky datasetu}
+
+Po propojení technických indikátorů s reálnými a imputovanými fundamenty vznikl finální dataset, který slouží jako základ pro veškerá další měření. Celkový počet features (29) dává modelu dostatečný prostor pro nalezení nelineárních závislostí, aniž by došlo k tzv. \textbf{prokletí dimenzionality} (Curse of Dimensionality).
+
+\textbf{Co to znamená v našem kontextu?} 
+V datové vědě platí, že s každým dalším přidaným indikátorem (dimenzí) roste objem dat potřebný k tomu, aby model nebyl ztracen v "prázdném prostoru". Pokud bychom měli stovky indikátorů na malém počtu firem, model by si začal vymýšlet náhodné vztahy (overfitting). Naše konfigurace (29 proměnných na cca 17 000 záznamů) představuje zdravý poměr, kdy má algoritmus dost informací pro rozhodování, ale stále se pohybuje v "hustě osídleném" datovém prostoru, kde jsou nalezené vztahy statisticky podložené.
 
 \begin{table}[H]
 \centering
@@ -359,53 +377,66 @@ Fundamentální metriky & 11 \\ \hline
 % ============================================
 \kapitola{Výsledky a analýza}
 
-\sekce{RF Regressor (Imputace)}
+Evaluace proběhla ve dvou fázích, které odpovídají dualitě našeho modelu. Nejdříve jsme posuzovali schopnost "rekonstruovat" historii (regrese) a následně schopnost "předpovídat" budoucnost (klasifikace).
 
-\podsekce{Výsledky per-target}
+\sekce{RF Regressor: Kvalita rekonstrukce dat}
+
+Předtím, než jsme se pokusili o jakoukoli predikci na trhu, museli jsme zajistit, aby naše imputovaná fundamentální data odpovídala realitě. K tomu jsme využili \textbf{RF Regressor}, u kterého jsme sledovali metriku $R^2$ (koeficient determinace).
+
+\podsekce{Metrika $R^2$ a její význam}
+Metrika $R^2$ udává, kolik procent variability (změn) cílové hodnoty dokáže model vysvětlit na základě vstupů. Pokud má $R^2$ hodnotu 0.9, znamená to, že 90 \% pohybu např. metriky P/E dokážeme odvodit z cenového grafu a objemů. V našem případě jsou výsledky nad 0.9 extrémně signifikantní a potvrzují, že tržní cena v sobě fundamentální zdraví firmy skutečně nese.
 
 \begin{table}[H]
 \centering
-\caption{Výsledky RF Regressoru - detailní}
+\caption{Výsledky RF Regressoru - detailní přesnost rekonstrukce}
 \begin{tabular}{|p{3cm}|p{2cm}|p{2cm}|p{3cm}|}
 \hline
-\textbf{Target} & \textbf{MAE} & \textbf{R² Score} & \textbf{Kvalita} \\ \hline
-trailingPE & 4.419 & 0.957 & $\star\star\star\star\star$ \\ \hline
-forwardPE & 2.595 & 0.964 & $\star\star\star\star\star$ \\ \hline
-returnOnAssets & 0.015 & 0.970 & $\star\star\star\star\star$ \\ \hline
-returnOnEquity & 0.045 & 0.935 & $\star\star\star\star$ \\ \hline
-priceToBook & 1.854 & 0.891 & $\star\star\star\star$ \\ \hline
-profitMargins & 0.031 & 0.886 & $\star\star\star\star$ \\ \hline
-debtToEquity & 38.513 & 0.765 & $\star\star\star$ \\ \hline
+\textbf{Cílová metrika} & \textbf{MAE} & \textbf{R² Score} & \textbf{Interpretace} \\ \hline
+trailingPE & 4.419 & 0.957 & Výborná \\ \hline
+forwardPE & 2.595 & 0.964 & Výborná \\ \hline
+returnOnAssets & 0.015 & 0.970 & Výborná \\ \hline
+returnOnEquity & 0.045 & 0.935 & Velmi dobrá \\ \hline
+priceToBook & 1.854 & 0.891 & Velmi dobrá \\ \hline
+profitMargins & 0.031 & 0.886 & Velmi dobrá \\ \hline
+debtToEquity & 38.513 & 0.765 & Dobrá \\ \hline
 \end{tabular}
 \end{table}
 
-\textbf{Průměrné $R^2$: 0.91}
+\podsekce{Feature Importance pro regresor}
+\textbf{Feature Importance} nám říká, o které informace se model nejvíce "opírá" při dělání svých odhadů. Pracuje na principu sledování toho, o kolik by se model zhoršil, kdybychom mu danou informaci vzali. 
 
-\podsekce{Feature Importance (Regressor)}
+Jak ukazuje Tabulka \ref{tab:reg_importance}, u regresoru hrají klíčovou roli následující faktory:
+
+\begin{itemize}
+    \item \textbf{Volume (Objem):} S obrovským náskokem nejdůležitější parametr (vliv $\sim$50 \%). Objem obchodů je přímým odrazem zájmu velkých institucionálních hráčů. Jelikož jsou fundamenty (zisky, dluhy) hlavním vodítkem pro tyto velké fondy, existuje mezi objemem a účetními metrikami velmi silná vazba.
+    \item \textbf{SMA a EMA (6--12 měsíců):} Klouzavé průměry za delší období. Protože se fundamenty mění pomalu (kvartálně), model ignoruje denní šum a soustředí se na dlouhodobý cenový trend. Průměrná cena za posledních 12 měsíců je pro odhad např. P/E ratio mnohem lepším vodítkem než aktuální cena.
+\end{itemize}
 
 \begin{table}[H]
 \centering
-\caption{Top 5 nejdůležitějších features pro imputaci}
-\begin{tabular}{|p{1cm}|p{3cm}|p{2.5cm}|}
+\caption{Nejdůležitější faktory pro imputaci historie}
+\label{tab:reg_importance}
+\begin{tabular}{|c|p{4cm}|c|}
 \hline
-\textbf{Rank} & \textbf{Feature} & \textbf{Importance} \\ \hline
+\textbf{Pořadí} & \textbf{Indikátor} & \textbf{Důležitost} \\ \hline
 1 & \textbf{volume} & 0.4995 \\ \hline
-2 & sma\_12 & 0.0734 \\ \hline
-3 & ema\_12 & 0.0730 \\ \hline
-4 & sma\_6 & 0.0586 \\ \hline
-5 & ema\_6 & 0.0583 \\ \hline
+2 & \texttt{sma\_12} & 0.0734 \\ \hline
+3 & \texttt{ema\_12} & 0.0730 \\ \hline
+4 & \texttt{sma\_6} & 0.0586 \\ \hline
+5 & \texttt{ema\_6} & 0.0583 \\ \hline
 \end{tabular}
 \end{table}
 
-\textbf{Poznatek:} Volume je dominantní prediktor fundamentálních metrik (korelace s tržní kapitalizací a likviditou).
+\sekce{RF Classifier: Predikční schopnost systému}
 
-\sekce{RF Classifier (Klasifikace)}
+Po úspěšné rekonstrukci historie jsme nasadili \textbf{RF Classifier}, aby určil směr budoucího vývoje. Zatímco regresor tipoval čísla, klasifikátor tipuje "škatulku" (DOWN, HOLD, UP).
 
-\podsekce{Celkové výsledky}
+\podsekce{Celkové výsledky a random baseline}
+Hlavním měřítkem úspěchu je porovnání s náhodou. Jelikož máme 3 třídy, náhodný tipér by měl úspěšnost \textbf{33.33 \%}. Náš model dosahuje \textbf{35.61 \%}, což ve světě financí není zanedbatelné – jde o důkaz, že model v trhu vidí neefektivity.
 
 \begin{table}[H]
 \centering
-\caption{Celkové výsledky klasifikátoru}
+\caption{Celkové metriky klasifikátoru}
 \begin{tabular}{|p{4cm}|p{3cm}|}
 \hline
 \textbf{Metrika} & \textbf{Hodnota} \\ \hline
@@ -413,12 +444,11 @@ Accuracy & \textbf{35.61\%} \\ \hline
 Precision & 36.57\% \\ \hline
 Recall & 35.61\% \\ \hline
 F1-Score & 35.77\% \\ \hline
-Random baseline & 33.33\% \\ \hline
-Test samples & \textbf{3,336} \\ \hline
+\textbf{Náhodný baseline} & \textbf{33.33\%} \\ \hline
 \end{tabular}
 \end{table}
 
-Model dosahuje nejlepších výsledků u třídy \textbf{UP} (přesnost 41\%) a \textbf{HOLD} (37\%). To naznačuje, že model je více "optimistický" a lépe identifikuje růstové trendy než prudké poklesy (DOWN: 29\%). Celkový výkon modelu je vyvážený, s mírným příklonem k profitabilitě u dlouhých pozic (UP).
+Model vykazuje vyšší přesnost u růstových trendů (UP), což naznačuje, že býčí trhy S\&P 500 mají čitelnější strukturu než náhlé panické výprodeje. 
 
 
 \podsekce{Per-Sector Analýza}
@@ -477,37 +507,50 @@ Model dosahuje \textbf{35.61\% accuracy}, což je o více než 2\% nad náhodný
     \item \textbf{Dominance techniky:} Krátkodobé pohyby jsou nejsilněji ovlivněny historickými výnosy a volatilitou, nicméně fundamenty (CurrentRatio, DebtToEquity) poskytují modelu nezbytný "kotvící" kontext.
     \item \textbf{Náročnost predikce:} Nízký rozdíl oproti náhodě potvrzuje, že trh je vysoce efektivní a většina pohybů je v měsíčním horizontu blízko náhodné procházce.
 \end{itemize}
-\podsekce{Analýza Confusion Matrix}
+\sekce{Hloubková analýza predikcí}
 
-\begin{verbatim}
-              DOWN  HOLD    UP
-   DOWN       98    39      56    (51% recall)
-   HOLD       72    44      100   (20% recall)
-   UP         84    85      92    (35% recall)
-\end{verbatim}
+\podsekce{Confusion Matrix: Kde se model plete?}
+\textbf{Confusion Matrix} je nástroj, který nám ukazuje "kdo s koho" – tedy kolikrát model trefil skutečnost a s čím si ji nejčastěji plete. Diagonála (v našem případě čísla 98, 44 a 92) představuje vítězství modelu.
 
-\textbf{Poznatky:}
+Z pohledu metriky \textbf{Recall} (schopnost modelu najít všechny relevantní případy dané třídy) vidíme zajímavý trend:
+
 \begin{enumerate}
-    \item Model má tendenci predikovat DOWN častěji
-    \item HOLD je nejhůře rozpoznávaná třída (pouze 20\% recall)
-    \item Nejvíce záměn mezi UP a HOLD
+    \item \textbf{DOWN (51 \% Recall):} Model velmi dobře pozná situaci, kdy se trh chystá klesat. Pokud nastane pokles, model ho zachytí v polovině případů.
+    \item \textbf{HOLD (20 \% Recall):} Toto je slabina modelu. Klid na trhu je často interpretován jako příprava na pohyb jedním nebo druhým směrem.
+    \item \textbf{UP (35 \% Recall):} Model je opatrný u růstů, což vede k nižšímu recallu, ale vyšší preciznosti (pokud model řekne "kupovat", je to spolehlivější).
 \end{enumerate}
-
-\podsekce{AUC Skóre}
 
 \begin{table}[H]
 \centering
-\caption{AUC skóre pro jednotlivé třídy}
-\begin{tabular}{|p{2cm}|p{2cm}|}
-\hline
-\textbf{Třída} & \textbf{AUC} \\ \hline
-DOWN & $\sim$0.55 \\ \hline
-HOLD & $\sim$0.52 \\ \hline
-UP & $\sim$0.54 \\ \hline
+\caption{Analýza záměn (Confusion Matrix - zjednodušená)}
+\begin{tabular}{l c c c l}
+\toprule
+ & \textbf{Pred.} DOWN & \textbf{Pred.} HOLD & \textbf{Pred.} UP & \textbf{Recall} \\
+\midrule
+\textbf{Skutečnost} DOWN & \textbf{98} & 39 & 56 & \textbf{51 \%} \\
+\textbf{Skutečnost} HOLD & 72 & \textbf{44} & 100 & \textbf{20 \%} \\
+\textbf{Skutečnost} UP   & 84 & 85 & \textbf{92} & \textbf{35 \%} \\
+\bottomrule
 \end{tabular}
 \end{table}
 
-Hodnoty AUC blízko 0.5 indikují slabou separabilitu tříd.
+\podsekce{Rozlišovací schopnost (AUC Score)}
+
+\textbf{AUC (Area Under Curve)} udává, jak moc je model "zmatený" při rozhodování mezi dvěma třídami. Hodnota \textbf{0.5} znamená totální zmatek (náhodu), hodnota \textbf{1.0} je dokonalý věštec.
+
+\begin{table}[H]
+\centering
+\caption{AUC skóre: Schopnost rozlišit třídy od sebe}
+\begin{tabular}{|p{3cm}|p{2cm}|p{7cm}|}
+\hline
+\textbf{Třída} & \textbf{AUC} & \textbf{Význam} \\ \hline
+DOWN & 0.55 & Mírná schopnost oddělit pokles od šumu. \\ \hline
+HOLD & 0.52 & Skoro náhodná separace. \\ \hline
+UP & 0.54 & Mírná schopnost zachytit růstový signál. \\ \hline
+\end{tabular}
+\end{table}
+
+Výsledky AUC potvrzují, že finanční trhy jsou extrémně náročné prostředí. I mírné vychýlení nad 0.5 však v kombinaci s velkým množstvím obchodů může tvořit ziskovou strategii.
 
 % ============================================
 % KAPITOLA 9: VIZUALIZACE

@@ -889,7 +889,7 @@ def final_evaluation():
     log(f"Test samples: {len(y_test)}")
     
     # 1. Confusion Matrix
-    log("\n1. Generování Confusion Matrix...")
+    log("\n1. Generovani Confusion Matrix...")
     cm = confusion_matrix(y_test, y_pred)
     
     plt.figure(figsize=(8, 6))
@@ -902,10 +902,10 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "confusion_matrix.png"), dpi=150)
     plt.close()
-    log("  Uloženo: confusion_matrix.png")
+    log("  Ulozeno: confusion_matrix.png")
     
     # 2. ROC Curves
-    log("\n2. Generování ROC křivek...")
+    log("\n2. Generovani ROC krivek...")
     n_classes = 3
     classes = ['DOWN', 'HOLD', 'UP']
     colors = ['#e74c3c', '#f39c12', '#27ae60']
@@ -930,10 +930,10 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "roc_curves.png"), dpi=150)
     plt.close()
-    log("  Uloženo: roc_curves.png")
+    log("  Ulozeno: roc_curves.png")
     
     # 3. Feature Importance
-    log("\n3. Generování Feature Importance...")
+    log("\n3. Generovani Feature Importance...")
     importance = model.feature_importances_
     feat_imp = pd.DataFrame({
         'feature': available_features,
@@ -947,10 +947,10 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "feature_importance.png"), dpi=150)
     plt.close()
-    log("  Uloženo: feature_importance.png")
+    log("  Ulozeno: feature_importance.png")
     
     # 4. Per-sector comparison
-    log("\n4. Generování Per-sector porovnání...")
+    log("\n4. Generovani Per-sector porovnani...")
     sector_metrics = {}
     
     for sector in df_test['sector'].unique():
@@ -995,14 +995,14 @@ def final_evaluation():
         plt.tight_layout()
         plt.savefig(os.path.join(FIGURES_DIR, "sector_comparison.png"), dpi=300)
         plt.close()
-        log("  Uloženo: sector_comparison.png")
+        log("  Ulozeno: sector_comparison.png")
     
     # =========================================================================
     # PREMIUM VIZUALIZACE (Nové grafy pro dokumentaci)
     # =========================================================================
     
     # 5. EQUITY CURVE (Backtest) - Klíčový graf!
-    log("\n5. Generování Equity Curve (Backtest)...")
+    log("\n5. Generovani Equity Curve (Backtest)...")
     
     # Strategie: Long když UP, Short když DOWN, nic když HOLD
     df_backtest = df_test.copy()
@@ -1051,10 +1051,10 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "equity_curve.png"), dpi=300, bbox_inches='tight')
     plt.close()
-    log("  Uloženo: equity_curve.png")
+    log("  Ulozeno: equity_curve.png")
     
     # 6. NORMALIZED CONFUSION MATRIX (Procentuální)
-    log("\n6. Generování Normalized Confusion Matrix...")
+    log("\n6. Generovani Normalized Confusion Matrix...")
     
     cm = confusion_matrix(y_test, y_pred)
     cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
@@ -1083,10 +1083,10 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "confusion_matrix_normalized.png"), dpi=300, bbox_inches='tight')
     plt.close()
-    log("  Uloženo: confusion_matrix_normalized.png")
+    log("  Ulozeno: confusion_matrix_normalized.png")
     
     # 7. CLASS DISTRIBUTION (Train vs Test)
-    log("\n7. Generování Class Distribution...")
+    log("\n7. Generovani Class Distribution...")
     
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
@@ -1117,23 +1117,23 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "class_distribution.png"), dpi=300, bbox_inches='tight')
     plt.close()
-    log("  Uloženo: class_distribution.png")
+    log("  Ulozeno: class_distribution.png")
     
     # 8. PREDICTION CONFIDENCE ANALYSIS
-    log("\n8. Generování Prediction Confidence Analysis...")
+    log("\n8. Generovani Prediction Confidence Analysis...")
     
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     
-    # Confidence distribution
+    # Confidence distribution (normalized to compare shapes, not absolute counts)
     ax1 = axes[0]
     correct_mask = y_test == y_pred
-    ax1.hist(df_test.loc[correct_mask, 'pred_confidence'], bins=20, alpha=0.7, 
-             label='Správné predikce', color='#27ae60')
-    ax1.hist(df_test.loc[~correct_mask, 'pred_confidence'], bins=20, alpha=0.7, 
-             label='Špatné predikce', color='#e74c3c')
-    ax1.set_xlabel('Confidence (pravděpodobnost nejistší třídy)', fontweight='bold')
-    ax1.set_ylabel('Počet predikcí', fontweight='bold')
-    ax1.set_title('Distribuce Confidence: Správné vs Špatné predikce', fontweight='bold')
+    ax1.hist(df_test.loc[correct_mask, 'pred_confidence'], bins=20, alpha=0.6, 
+             label='Spravne predikce', color='#27ae60', density=True)
+    ax1.hist(df_test.loc[~correct_mask, 'pred_confidence'], bins=20, alpha=0.6, 
+             label='Spatne predikce', color='#e74c3c', density=True)
+    ax1.set_xlabel('Confidence (pravdepodobnost nejistsi tridy)', fontweight='bold')
+    ax1.set_ylabel('Hustota (relativni cetnost)', fontweight='bold')
+    ax1.set_title('Distribuce Confidence: Spravne vs Spatne', fontweight='bold')
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     
@@ -1152,7 +1152,7 @@ def final_evaluation():
         ax2.set_xticklabels(x_labels, rotation=45, ha='right')
         ax2.set_xlabel('Confidence rozsah', fontweight='bold')
         ax2.set_ylabel('Accuracy (%)', fontweight='bold')
-        ax2.set_title('Accuracy podle Confidence úrovně', fontweight='bold')
+        ax2.set_title('Accuracy podle Confidence urovne', fontweight='bold')
         ax2.axhline(y=33.3, color='r', linestyle='--', label='Random baseline')
         ax2.legend()
         ax2.grid(True, alpha=0.3)
@@ -1160,10 +1160,10 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "prediction_confidence.png"), dpi=300, bbox_inches='tight')
     plt.close()
-    log("  Uloženo: prediction_confidence.png")
+    log("  Ulozeno: prediction_confidence.png")
     
     # 9. MONTHLY RETURNS HISTOGRAM
-    log("\n9. Generování Monthly Returns Histogram...")
+    log("\n9. Generovani Monthly Returns Histogram...")
     
     fig, ax = plt.subplots(figsize=(10, 6))
     
@@ -1183,7 +1183,7 @@ def final_evaluation():
     plt.tight_layout()
     plt.savefig(os.path.join(FIGURES_DIR, "returns_histogram.png"), dpi=300, bbox_inches='tight')
     plt.close()
-    log("  Uloženo: returns_histogram.png")
+    log("  Ulozeno: returns_histogram.png")
     
     # =========================================================================
     # BACKTEST METRIKY
@@ -1203,9 +1203,9 @@ def final_evaluation():
     win_rate = winning_trades / total_trades * 100 if total_trades > 0 else 0
     
     log("\n" + "=" * 50)
-    log("BACKTEST VÝSLEDKY")
+    log("BACKTEST VYSLEDKY")
     log("=" * 50)
-    log(f"  Celkem obchodů: {total_trades:,}")
+    log(f"  Celkem obchodu: {total_trades:,}")
     log(f"  Long pozice: {long_trades:,}")
     log(f"  Short pozice: {short_trades:,}")
     log(f"  Win Rate: {win_rate:.1f}%")
@@ -1213,9 +1213,9 @@ def final_evaluation():
     log(f"  Buy & Hold Return: {buyhold_return_pct:.2f}%")
     log(f"  Outperformance: {strategy_return_pct - buyhold_return_pct:.2f}%")
     
-    # 10. Finální report
+    # 10. Finalni report
     log("\n" + "=" * 50)
-    log("FINÁLNÍ VÝSLEDKY")
+    log("FINALNI VYSLEDKY")
     log("=" * 50)
     
     accuracy = accuracy_score(y_test, y_pred)
@@ -1223,17 +1223,17 @@ def final_evaluation():
     recall = recall_score(y_test, y_pred, average='weighted')
     f1 = f1_score(y_test, y_pred, average='weighted')
     
-    log(f"\nCelkové metriky:")
+    log(f"\nCelkove metriky:")
     log(f"  Accuracy:  {accuracy:.4f}")
     log(f"  Precision: {precision:.4f}")
     log(f"  Recall:    {recall:.4f}")
     log(f"  F1-Score:  {f1:.4f}")
     
-    log(f"\nPer-sector výsledky:")
+    log(f"\nPer-sector vysledky:")
     for sector, metrics in sector_metrics.items():
         log(f"  {sector}: Acc={metrics['accuracy']:.3f}, F1={metrics['f1']:.3f} (n={metrics['n_samples']})")
     
-    # Uložit finální report
+    # Ulozit finalni report
     report = {
         'timestamp': datetime.now().isoformat(),
         'experiment': '150_tickers_5_sectors',

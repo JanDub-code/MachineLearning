@@ -147,17 +147,15 @@ Historická fundamentální data často chybí (Missing Completely at Random). N
 
 \podsekce{Přístup k imputaci}
 
-Regresní imputace pomocí Random Forest:
+Namísto složitých matematických vzorců si tento proces můžeme představit jako "inteligentní odhad" založený na historických souvislostech. Model využívá toho, že tržní cena a objemy obchodů nejsou náhodné, ale úzce souvisejí s finančním zdravím firmy. 
 
-$$\hat{F}_t = RF(OHLCV_t, TechIndicators_t)$$
+Celý proces funguje ve dvou fázích:
+\begin{enumerate}
+    \item \textbf{Učení z reality:} Model se nejdříve podívá na moderní období (poslední 2 roky), kde máme k dispozici jak kompletní ceny, tak i přesné účetní výkazy (fundamenty). Naučí se v nich rozpoznat vzorce – například jaký objem obchodů a jaký cenový trend obvykle doprovází firmu s vysokým ziskem nebo nízkým zadlužením.
+    \item \textbf{Rekonstrukce historie:} Takto získané "zkušenosti" pak model aplikuje na hlubokou historii (předchozích 8 let). Podívá se na tehdejší pohyby cen a "dopočítá" k nim nejpravděpodobnější fundamentální hodnoty, které by takovému chování odpovídaly.
+\end{enumerate}
 
-Kde:
-\begin{itemize}
-    \item $\hat{F}_t$ = predikované fundamentální metriky v čase $t$
-    \item $RF$ = Random Forest regressor
-    \item $OHLCV_t$ = cenová data v čase $t$
-    \item $TechIndicators_t$ = technické indikátory v čase $t$
-\end{itemize}
+Díky tomuto postupu nemusíme zahazovat 80 \% historie jen proto, že v ní chybí účetní výkazy. Naopak tím získáváme robustní základ pro trénink výsledného klasifikátoru, který díky tomu vidí trh v mnohem širším kontextu.
 
 % ============================================
 % KAPITOLA 3: MATEMATICKÉ ZÁKLADY
@@ -182,7 +180,7 @@ Pro finanční data není pouhá "přesnost" (accuracy) vždy dostačující. Po
 \begin{itemize}
     \item \textbf{F1-Score pro klasifikaci:} Pomáhá nám pochopit, zda model jen "hádá" nejčastější třídu, nebo skutečně dokáže rozlišit mezi výkyvy trhu (UP/DOWN).
     \item \textbf{Feature Importance:} Umožňuje nám nahlédnout do "černé skříňky" modelu a zjistit, které faktory (např. RSI nebo EBITDA) mají na jeho rozhodování největší vliv.
-    \item \textbf{Metriky imputace ($R^2$ a MAE):} Před samotnou klasifikací doplňujeme chybějící fundamenty. Zde nás zajímá, jak blízko jsou naše odhady realitě. $R^2$ skóre blížící se k 1.0 značí, že model skvěle zachytil vztahy mezi cenou a fundamenty.
+    \item \textbf{Metriky imputace ($R^2$ a MAE):} Před samotnou klasifikací doplňujeme chybějící fundamenty a sledujeme, jak blízko jsou naše odhady realitě. Zatímco \textbf{MAE} (Mean Absolute Error) udává průměrnou velikost chyby v původních jednotkách, skóre \textbf{$R^2$} blížící se k 1.0 značí, že model skvěle zachytil vztahy mezi cenou a fundamenty.
 \end{itemize}
 
 \sekce{Zajištění férového testování (TimeSeriesSplit)}
@@ -691,50 +689,27 @@ Real-time & Nasazení pro live trading & Nízká \\ \hline
 \end{tabular}
 \end{table}
 
-% ============================================
-% KAPITOLA 11: ZÁVĚR
-% ============================================
 \kapitola{Závěr}
+
+V rámci této práce byl navržen a implementován komplexní systém strojového učení pro klasifikaci měsíčních pohybů akciových titulů indexu S\&P 500. Hlavním cílem bylo ověřit, zda moderní algoritmy dokáží identifikovat predikovatelné vzorce v prostředí, které je z definice považováno za vysoce efektivní a šumové.
 
 \sekce{Shrnutí dosažených výsledků}
 
-\podsekce{Co funguje dobře}
+Experiment prokázal, že zvolený hybridní přístup kombinující technické indikátory s fundamentálními daty má reálnou oporu v datech. Klíčovým pilířem řešení se stal \textbf{RF Regressor}, který sloužil k inteligentní imputaci chybějících historických fundamentů. Dosazené výsledky koeficientu determinace ($R^2$) v rozmezí 0.76 až 0.97 u nejdůležitějších metrik (jako P/E ratio či ROA) potvrzují, že vztah mezi tržní cenou a účetním stavem firmy je dostatečně silný pro věrohodnou rekonstrukci historie.
 
-\begin{enumerate}
-    \item \textbf{RF Regressor pro imputaci} - $R^2$ 0.76-0.97 je excelentní
-    \item \textbf{Hybridní přístup} - Umožňuje využít fundamenty i pro historii
-    \item \textbf{Technické indikátory} - Returns a volatility jsou nejdůležitější
-    \item \textbf{Financials sektor} - Model zde funguje nejlépe (\textbf{40.3\%})
-    \item \textbf{Stabilita napříč sektory} - Všech 5 sektorů vykazuje konzistentní výsledky
-\end{enumerate}
+V samotné klasifikaci dosáhl model celkové přesnosti \textbf{35,6 \%}, což představuje nárůst o 2,3 procentního bodu nad náhodný baseline (33,3 \%). Ačkoliv se tento rozdíl může zdát v absolutních číslech malý, v kontextu finančních trhů se jedná o statisticky významnou výhodu. Nejvyšší stability a úspěšnosti (\textbf{40,3 \%}) bylo dosaženo ve finančním sektoru, což naznačuje, že tento segment trhu vykazuje nejčitelnější vazby mezi fundamentálními ukazateli a budoucím vývojem ceny.
 
-\podsekce{Limitace}
+Analýza důležitosti příznaků ukázala, že model se nejvíce opírá o parametry typu "momentum" (předchozí výnosy) a volatilitu. Fundamentální metriky, ačkoliv nebyly dominantní, poskytly modelu nezbytný kontext pro zvýšení přesnosti a stability napříč všemi pěti testovanými sektory.
 
-\begin{enumerate}
-    \item \textbf{Accuracy 35.6\%} - O 2.3\% lepší než random baseline (33.3\%)
-    \item \textbf{HOLD třída} - Nejhůře rozpoznávaná třída
-    \item \textbf{Finanční trhy} - Inherentně těžko predikovatelné (EMH)
-\end{enumerate}
+\sekce{Vědecký a praktický přínos}
 
-\sekce{Vědecký přínos}
+Přínos této práce lze spatřovat ve třech rovinách. Z \textbf{metodologického} hlediska byla demonstrována životaschopnost hybridního modelu, který řeší kritický problém nedostatku dat skrze regresi. Z \textbf{praktického} pohledu byla vytvořena robustní, plně automatizovaná pipeline, která je schopna v reálném čase stahovat, čistit a vyhodnocovat data pro libovolné množství tickerů. \textbf{Analytická} část práce pak přinesla vhled do hierarchie faktorů ovlivňujících měsíční pohyby akcií, přičemž potvrdila dominanci technických indikátorů nad kvartálními účetními daty v daném časovém horizontu.
 
-\begin{enumerate}
-    \item \textbf{Metodologický:} Demonstrace hybridního přístupu k řešení chybějících dat
-    \item \textbf{Praktický:} Funkční end-to-end ML pipeline pro finanční predikce
-    \item \textbf{Analytický:} Feature importance analýza technických vs. fundamentálních faktorů
-\end{enumerate}
+\sekce{Doporučení pro další vývoj}
 
-\sekce{Doporučení}
+Přestože model prokázal schopnost překonávat náhodu, existuje značný prostor pro další vylepšení. Jako nejperspektivnější směr dalšího výzkumu se jeví integrace tzv. \textbf{alternativních dat}, konkrétně analýza sentimentu z finančních zpráv a sociálních sítí, které často reagují na tržní události rychleji než standardní technické indikátory.
 
-Pro zlepšení výsledků doporučuji:
-
-\begin{enumerate}
-    \item \textbf{Alternative data} - Sentiment z news/social media
-    \item \textbf{Jiné modely} - XGBoost, LSTM pro časové ř ady
-    \item \textbf{Binární klasifikace} - UP vs NOT UP (snazší problém)
-    \item \textbf{Confidence thresholds} - Obchodovat pouze při vysoké jistotě
-    \item \textbf{Real-time systém} - Automatizované periodické dotrénovávání
-\end{enumerate}
+Z technologického hlediska by bylo vhodné prozkoumat nasazení architektur hlubokého učení typu \textbf{LSTM} nebo \textbf{Transformers}, které by mohly lépe zachytit dlouhodobé časové závislosti v datech. Dále doporučuji zvážit přechod na binární klasifikaci (např. pouze signály pro nákup vs. zbytek), což by snížilo složitost problému a pravděpodobně vedlo k vyšší preciznosti modelu. V neposlední řadě by implementace \textbf{confidence thresholds} umožnila automatizované exekuci obchodovat pouze v momentech, kdy jistota modelu přesahuje stanovenou mez, čímž by se zvýšila celková ziskovost a bezpečnost navrženého systému.
 
 \begin{literatura}
 

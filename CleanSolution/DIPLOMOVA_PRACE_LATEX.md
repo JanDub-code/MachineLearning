@@ -372,6 +372,20 @@ Fundamentální metriky & 11 \\ \hline
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{data/150_tickers/figures/class_distribution.png}
+    \caption{Rozložení cílových tříd v datasetu. DOWN (pokles > 3 \%), HOLD ($\pm$ 3 \%), UP (růst > 3 \%). Relativně vyrovnané rozdělení mezi růsty a poklesy potvrzuje reprezentativnost dat.}
+    \label{fig:class_distribution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{data/150_tickers/figures/returns_histogram.png}
+    \caption{Histogram měsíčních výnosů. Čáry označují prahové hodnoty $\pm$ 3 \%. Většina pohybů se koncentruje kolem nuly, což odpovídá efektivitě trhu.}
+    \label{fig:returns_hist}
+\end{figure}
+
 % ============================================
 % KAPITOLA 8: VÝSLEDKY A ANALÝZA
 % ============================================
@@ -450,6 +464,9 @@ F1-Score & 35.77\% \\ \hline
 
 Model vykazuje vyšší přesnost u růstových trendů (UP), což naznačuje, že býčí trhy S\&P 500 mají čitelnější strukturu než náhlé panické výprodeje. 
 
+\podsekce{Vliv rozsahu dat: Porovnání s baselinem}
+Klíčovým zjištěním experimentu je vliv množství dat na stabilitu modelu. Při testování na menším vzorku (30 tickerů) dosahovala přesnost pouze \textbf{33,4 \%}, což je na úrovni náhodného hádání. Rozšířením na \textbf{150 tickerů} a 10 let historie jsme dosáhli nárůstu na \textbf{35,6 \%}. Tento rozdíl o více než 2 \% (tzv. "alpha") jasně dokazuje, že Random Forest v tomto typu úloh profituje z většího množství příkladů, které mu umožní lépe zobecnit vzorce a odfiltrovat náhodný šum jednotlivých akcií.
+
 
 \podsekce{Per-Sector Analýza}
 
@@ -468,6 +485,13 @@ Technology & 35.2\% & 34.7\% & 732 \\ \hline
 \end{table}
 
 \textbf{Poznatek:} Financials sektor je nejlépe predikovatelný. Technology sektor vykazuje stabilní, ale mírně nižší výkonnost kvůli vyšší volatiličě.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{data/150_tickers/figures/sector_comparison.png}
+    \caption{Grafické srovnání výkonnosti modelu napříč pěti sektory S\&P 500. Je patrná vyšší přesnost u stabilnějších sektorů jako Financials.}
+    \label{fig:sector_comp}
+\end{figure}
 
 \podsekce{Feature Importance (Classifier)}
 
@@ -496,6 +520,13 @@ Technology & 35.2\% & 34.7\% & 732 \\ \hline
     \item Momentum features (returns, MACD) jsou nejdůležitější
     \item Fundamenty (ROE, ROA) jsou stále významné (top 10)
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{data/150_tickers/figures/feature_importance.png}
+    \caption{Relativní důležitost všech 29 proměnných pro finální klasifikátor. Barvy indikují typ proměnné (Cenové, Technické, Fundamentální).}
+    \label{fig:feat_imp_classifier}
+\end{figure}
 
 \sekce{Shrnutí výsledků}
 
@@ -534,6 +565,13 @@ Z pohledu metriky \textbf{Recall} (schopnost modelu najít všechny relevantní 
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{data/150_tickers/figures/confusion_matrix_normalized.png}
+    \caption{Normalizovaná a absolutní Confusion Matrix. Diagonála ukazuje schopnost modelu správně zařadit akcii do jedné ze tří kategorií.}
+    \label{fig:conf_matrix_fig}
+\end{figure}
+
 \podsekce{Rozlišovací schopnost (AUC Score)}
 
 \textbf{AUC (Area Under Curve)} udává, jak moc je model "zmatený" při rozhodování mezi dvěma třídami. Hodnota \textbf{0.5} znamená totální zmatek (náhodu), hodnota \textbf{1.0} je dokonalý věštec.
@@ -552,73 +590,22 @@ UP & 0.54 & Mírná schopnost zachytit růstový signál. \\ \hline
 
 Výsledky AUC potvrzují, že finanční trhy jsou extrémně náročné prostředí. I mírné vychýlení nad 0.5 však v kombinaci s velkým množstvím obchodů může tvořit ziskovou strategii.
 
-% ============================================
-% KAPITOLA 9: VIZUALIZACE
-% ============================================
-\kapitola{Vizualizace}
-
-\sekce{Confusion Matrix}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/confusion_matrix_normalized.png}
-    \caption{Confusion Matrix (absolutní počty i normalizovaná procentuální verze). Levý graf ukazuje absolutní počty predikcí, pravý graf zobrazuje procentuální úspěšnost pro každou třídu. Normalizovaná matice umožňuje posoudit, jak dobře model rozpoznává jednotlivé třídy nezávisle na jejich četnosti v datasetu. Diagonála reprezentuje správné predikce.}
-    \label{fig:confusion_matrix}
-\end{figure}
-
-\sekce{ROC Křivky}
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{data/150_tickers/figures/roc_curves.png}
-    \caption{ROC křivky (Receiver Operating Characteristic) pro jednotlivé třídy DOWN, HOLD a UP. Osa X představuje False Positive Rate, osa Y True Positive Rate. Čím blíže křivka k levému hornímu rohu, tím lepší je separabilita dané třídy. AUC (Area Under Curve) hodnoty nad 0.5 indikují, že model je lepší než náhodný klasifikátor.}
-    \label{fig:roc_curves}
+    \caption{ROC křivky pro jednotlivé třídy. Oddělení křivky od diagonály značí prediktivní schopnost modelu.}
+    \label{fig:roc_fig}
 \end{figure}
 
-\sekce{Feature Importance}
+\podsekce{Analýza Confidence a spolehlivosti}
+
+Důležitým aspektem je vědět, kdy si je model jistý. Z analýzy confidence (Obrázek \ref{fig:conf_anal}) vyplývá, že accuracy modelu roste lineárně s jeho jistotou. Pokud model predikuje třídu s jistotou přes 50 \%, jeho reálný výkon se blíží k 45 \% accuracy.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/feature_importance.png}
-    \caption{Relativní důležitost jednotlivých features pro klasifikační model Random Forest. Delší sloupce indikují vyšší přínos dané proměnné k predikci. Technické indikátory (returns, volatility, RSI, MACD) dominují, což naznačuje, že krátkodobé cenové pohyby a momentum jsou nejsilnějšími prediktory budoucího směru ceny.}
-    \label{fig:feature_importance}
-\end{figure}
-
-\sekce{Porovnání Sektorů}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/sector_comparison.png}
-    \caption{Srovnání výkonnosti modelu napříč 5 sektory S\&P 500. Graf zobrazuje Accuracy, Precision, Recall a F1-Score pro každý sektor. Financials dosahují nejlepších výsledků (40.3\% accuracy), zatímco Technology vykazuje nejnižší výkonnost kvůli vyšší volatilitě. Stabilita metrik napříč sektory potvrzuje robustnost pipeline.}
-    \label{fig:sector_comparison}
-\end{figure}
-
-
-\sekce{Distribuce Tříd}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/class_distribution.png}
-    \caption{Rozložení cílových tříd v trénovacích a testovacích datech. DOWN (červená) reprezentuje poklesy větší než 3\%, HOLD (oranžová) pohyby v rozmezí $\pm$3\%, UP (zelená) růsty větší než 3\%. Vyvážená distribuce tříd v obou datasetech potvrzuje, že model není vystaven class imbalance problému a výsledky jsou reprezentativní.}
-    \label{fig:class_distribution}
-\end{figure}
-
-\sekce{Analýza Confidence Predikcí}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/prediction_confidence.png}
-    \caption{Analýza spolehlivosti modelu. Levý graf porovnává distribuci confidence (pravděpodobnosti predikované třídy) pro správné vs. špatné predikce -- ideálně by správné predikce měly mít vyšší confidence. Pravý graf ukazuje, jak accuracy roste s confidence úrovní -- vyšší confidence typicky koreluje s lepší přesností, což umožňuje implementovat strategii obchodování pouze při vysoké jistotě modelu.}
-    \label{fig:prediction_confidence}
-\end{figure}
-
-\sekce{Distribuce Měsíčních Výnosů}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\linewidth]{data/150_tickers/figures/returns_histogram.png}
-    \caption{Histogram měsíčních výnosů v testovacím období. Červená přerušovaná čára označuje DOWN threshold (-3\%), zelená přerušovaná čára UP threshold (+3\%). Oblast mezi nimi představuje HOLD zónu. Distribuce ukazuje přirozené rozložení tříd a zdůvodňuje volbu thresholdu $\pm$3\% jako hranice mezi signifikantním pohybem a šumem.}
-    \label{fig:returns_histogram}
+    \includegraphics[width=0.85\linewidth]{data/150_tickers/figures/prediction_confidence.png}
+    \caption{Analýza spolehlivosti predikcí. Správné predikce vykazují v průměru vyšší míru jistoty (confidence), což umožňuje budovat konzervativnější strategie.}
+    \label{fig:conf_anal}
 \end{figure}
 
 % =========================================================================
@@ -693,14 +680,14 @@ Výsledky AUC potvrzují, že finanční trhy jsou extrémně náročné prostř
 \begin{table}[H]
 \centering
 \caption{Navrhovaná budoucí rozšíření}
-\begin{tabular}{|p{3cm}|p{6cm}|p{2cm}|}
+\begin{tabular}{|p{3cm}|p{6cm}|p{2.5cm}|}
 \hline
 \textbf{Rozšíření} & \textbf{Popis} & \textbf{Priorita} \\ \hline
-Více tickerů & 100-150 tickerů, více sektorů & $\star\star\star\star\star$ \\ \hline
-Alternative data & Sentiment z news/social media & $\star\star\star\star$ \\ \hline
-Deep Learning & LSTM/Transformer pro časové řady & $\star\star\star$ \\ \hline
-Ensemble & Kombinace více modelů & $\star\star\star$ \\ \hline
-Real-time & Automatizovaný trading systém & $\star\star$ \\ \hline
+Více tickerů & Rozšíření na celý index S\&P 500 & \textbf{Vysoká} \\ \hline
+Alternative data & Sentiment z news/social media & Střední \\ \hline
+Deep Learning & LSTM/Transformer pro časové řady & Střední \\ \hline
+Ensemble & Kombinace více modelů (Stacking) & Nízká \\ \hline
+Real-time & Nasazení pro live trading & Nízká \\ \hline
 \end{tabular}
 \end{table}
 
@@ -809,27 +796,26 @@ beta
 \begin{verbatim}
 CleanSolution/
 │
-├── run_150_pipeline.py            # Hlavní pipeline (vše v jednom)
-├── DIPLOMOVA_PRACE_LATEX.md       # LaTeX dokumentace
-├── README.md                      # Přehled projektu
-├── requirements.txt               # Python závislosti
+├── run_150_pipeline.py            # Produkční pipeline (150 tickerů)
+├── run_evaluation_only.py         # Skript pro rychlou re-evaluaci
+├── DIPLOMOVA_PRACE_LATEX.md       # Hlavní LaTeX dokument
+├── requirements.txt               # Seznam knihoven
 │
 ├── data/
-│   └── 150_tickers/
-│       ├── ohlcv/                 # OHLCV data (150 tickerů)
-│       ├── fundamentals/          # Fundamentální data
-│       ├── complete/              # Kompletní dataset (~17k řádků)
-│       └── figures/               # 9 vizualizací (300 DPI)
+│   ├── 30_tickers/                # Baseline data (starší verze)
+│   └── 150_tickers/               # Hlavní experimentální data
+│       ├── ohlcv/                 # Ceny a objemy
+│       ├── fundamentals/          # Účetní výkazy
+│       ├── complete/              # Finální sloučený dataset
+│       └── figures/               # Grafické výstupy (300 DPI)
 │
 ├── models/
-│   └── 150_tickers/
-│       ├── rf_classifier_tuned.pkl    # Natrénovaný model
-│       ├── classifier_scaler_tuned.pkl
-│       └── *.json                     # Metadata
+│   ├── 30_tickers/                # Baseline modely
+│   └── 150_tickers/               # Produkční modely
+│       ├── rf_classifier_tuned.pkl
+│       └── *.json                 # Metadata a statistiky
 │
-└── docs/                          # Doprovodná dokumentace
-    ├── METHODOLOGY.md
-    └── MATHEMATICAL_FOUNDATIONS.md
+└── docs/                          # Teoretické podklady
 \end{verbatim}
 
 \sekce{Příloha C: Instalace a spuštění}

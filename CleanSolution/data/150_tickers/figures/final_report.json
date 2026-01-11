@@ -1,55 +1,33 @@
 {
-  "timestamp": "2026-01-01T00:56:59.842848",
+  "timestamp": "2026-01-11T17:10:21.731483",
   "experiment": "150_tickers_5_sectors",
   "threshold": 0.03,
   "overall_metrics": {
-    "accuracy": 0.3564148681055156,
-    "precision": 0.36802877854030935,
-    "recall": 0.3564148681055156,
-    "f1_score": 0.35846969402693607
+    "accuracy": 0.35611510791366907,
+    "precision": 0.3657040357112214,
+    "recall": 0.35611510791366907,
+    "f1_score": 0.357717433418581
   },
-  "sector_metrics": {
-    "Healthcare": {
-      "accuracy": 0.3785310734463277,
-      "precision": 0.3771111786942344,
-      "recall": 0.3785310734463277,
-      "f1": 0.3710733685447202,
-      "n_samples": 708
-    },
-    "Technology": {
-      "accuracy": 0.34562841530054644,
-      "precision": 0.35570295862091805,
-      "recall": 0.34562841530054644,
-      "f1": 0.32540464459708324,
-      "n_samples": 732
-    },
-    "Consumer": {
-      "accuracy": 0.3527397260273973,
-      "precision": 0.37059400050978236,
-      "recall": 0.3527397260273973,
-      "f1": 0.35465752291256786,
-      "n_samples": 584
-    },
-    "Industrials": {
-      "accuracy": 0.32968536251709984,
-      "precision": 0.35285229048996364,
-      "recall": 0.32968536251709984,
-      "f1": 0.3328068436121981,
-      "n_samples": 731
-    },
-    "Financials": {
-      "accuracy": 0.3803786574870912,
-      "precision": 0.39094563245609576,
-      "recall": 0.3803786574870912,
-      "f1": 0.3792068226647285,
-      "n_samples": 581
-    }
-  },
+  "sector_metrics": {},
   "n_test_samples": 3336,
+  "backtest": {
+    "total_trades": 2359,
+    "long_trades": 1126,
+    "short_trades": 1233,
+    "win_rate": 50.06358626536668,
+    "strategy_return_pct": -99.99946835077527,
+    "buyhold_return_pct": 3.592647086398908e+19,
+    "outperformance_pct": -3.592647086398908e+19
+  },
   "figures": [
     "confusion_matrix.png",
+    "confusion_matrix_normalized.png",
     "roc_curves.png",
     "feature_importance.png",
-    "sector_comparison.png"
+    "sector_comparison.png",
+    "equity_curve.png",
+    "class_distribution.png",
+    "prediction_confidence.png",
+    "returns_histogram.png"
   ]
 }

@@ -49,7 +49,7 @@ warnings.filterwarnings('ignore')
 # KONFIGURACE
 # =============================================================================
 
-BASE_DIR = r"c:\Users\Bc. Jan Dub\Desktop\GIT\MachineLearning\CleanSolution"
+BASE_DIR = r"c:\Users\Hans\Desktop\cv\MachineLearning\CleanSolution"
 
 # Výstupní adresáře pro experiment
 DATA_DIR = os.path.join(BASE_DIR, "data", "150_tickers")
@@ -820,13 +820,22 @@ def hyperparameter_tuning():
 # =============================================================================
 
 def final_evaluation():
-    """Generuje finální vizualizace a metriky"""
-    log_section("KROK 6: FINÁLNÍ EVALUACE + VIZUALIZACE")
+    """Generuje finální vizualizace a metriky - PREMIUM verze"""
+    log_section("KROK 6: FINÁLNÍ EVALUACE + PREMIUM VIZUALIZACE")
     
     import matplotlib
     matplotlib.use('Agg')  # Non-interactive backend
     import matplotlib.pyplot as plt
     import seaborn as sns
+    
+    # Nastavení pro profesionální grafy
+    plt.style.use('seaborn-v0_8-whitegrid')
+    plt.rcParams['figure.dpi'] = 300
+    plt.rcParams['savefig.dpi'] = 300
+    plt.rcParams['font.size'] = 11
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['figure.facecolor'] = 'white'
     
     os.makedirs(FIGURES_DIR, exist_ok=True)
     
@@ -857,9 +866,10 @@ def final_evaluation():
     df_clean['target'] = df_clean['target'].astype(int)
     df_clean = df_clean.sort_values('date').reset_index(drop=True)
     
-    # Test set
+    # Train/Test set
     split_idx = int(len(df_clean) * 0.8)
-    df_test = df_clean.iloc[split_idx:]
+    df_train = df_clean.iloc[:split_idx].copy()
+    df_test = df_clean.iloc[split_idx:].copy()
     
     X_test = df_test[available_features].values
     y_test = df_test['target'].values
@@ -867,6 +877,14 @@ def final_evaluation():
     
     y_pred = model.predict(X_test_scaled)
     y_proba = model.predict_proba(X_test_scaled)
+    
+    # Přidat predikce do test DataFrame pro backtesting
+    df_test = df_test.reset_index(drop=True)
+    df_test['prediction'] = y_pred
+    df_test['pred_proba_down'] = y_proba[:, 0]
+    df_test['pred_proba_hold'] = y_proba[:, 1]
+    df_test['pred_proba_up'] = y_proba[:, 2]
+    df_test['pred_confidence'] = y_proba.max(axis=1)
     
     log(f"Test samples: {len(y_test)}")
     
@@ -975,11 +993,227 @@ def final_evaluation():
         ax.set_ylim(0, 1)
         ax.grid(axis='y', alpha=0.3)
         plt.tight_layout()
-        plt.savefig(os.path.join(FIGURES_DIR, "sector_comparison.png"), dpi=150)
+        plt.savefig(os.path.join(FIGURES_DIR, "sector_comparison.png"), dpi=300)
         plt.close()
         log("  Uloženo: sector_comparison.png")
     
-    # 5. Finální report
+    # =========================================================================
+    # PREMIUM VIZUALIZACE (Nové grafy pro dokumentaci)
+    # =========================================================================
+    
+    # 5. EQUITY CURVE (Backtest) - Klíčový graf!
+    log("\n5. Generování Equity Curve (Backtest)...")
+    
+    # Strategie: Long když UP, Short když DOWN, nic když HOLD
+    df_backtest = df_test.copy()
+    df_backtest['strategy_return'] = 0.0
+    
+    # UP predikce -> long pozice -> výnos = future_return
+    up_mask = df_backtest['prediction'] == 2
+    df_backtest.loc[up_mask, 'strategy_return'] = df_backtest.loc[up_mask, 'future_return'].fillna(0)
+    
+    # DOWN predikce -> short pozice -> výnos = -future_return
+    down_mask = df_backtest['prediction'] == 0
+    df_backtest.loc[down_mask, 'strategy_return'] = -df_backtest.loc[down_mask, 'future_return'].fillna(0)
+    
+    # Buy & Hold benchmark
+    df_backtest['buyhold_return'] = df_backtest['future_return'].fillna(0)
+    
+    # Kumulativní výnosy
+    df_backtest['cumulative_strategy'] = (1 + df_backtest['strategy_return']).cumprod()
+    df_backtest['cumulative_buyhold'] = (1 + df_backtest['buyhold_return']).cumprod()
+    
+    fig, axes = plt.subplots(2, 1, figsize=(14, 10))
+    
+    # Horní graf: Equity Curve
+    ax1 = axes[0]
+    ax1.plot(range(len(df_backtest)), df_backtest['cumulative_strategy'], 
+             label='ML Strategie', linewidth=2, color='#2ecc71')
+    ax1.plot(range(len(df_backtest)), df_backtest['cumulative_buyhold'], 
+             label='Buy & Hold', linewidth=2, color='#3498db', alpha=0.7)
+    ax1.axhline(y=1, color='k', linestyle='--', alpha=0.3)
+    ax1.set_ylabel('Portfolio Value (počáteční = 1.0)', fontweight='bold')
+    ax1.set_xlabel('Čas (měsíce v testovacím období)')
+    ax1.set_title('Equity Curve: ML Strategie vs Buy & Hold\n(150 tickerů, 5 sektorů)', fontweight='bold', fontsize=14)
+    ax1.legend(loc='upper left')
+    ax1.grid(True, alpha=0.3)
+    
+    # Spodní graf: Drawdown
+    ax2 = axes[1]
+    rolling_max = df_backtest['cumulative_strategy'].expanding().max()
+    drawdown = (df_backtest['cumulative_strategy'] - rolling_max) / rolling_max * 100
+    ax2.fill_between(range(len(df_backtest)), drawdown, 0, alpha=0.5, color='#e74c3c')
+    ax2.set_ylabel('Drawdown (%)', fontweight='bold')
+    ax2.set_xlabel('Čas (měsíce)')
+    ax2.set_title('Drawdown analýza', fontweight='bold')
+    ax2.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGURES_DIR, "equity_curve.png"), dpi=300, bbox_inches='tight')
+    plt.close()
+    log("  Uloženo: equity_curve.png")
+    
+    # 6. NORMALIZED CONFUSION MATRIX (Procentuální)
+    log("\n6. Generování Normalized Confusion Matrix...")
+    
+    cm = confusion_matrix(y_test, y_pred)
+    cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
+    
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    
+    # Absolutní
+    ax1 = axes[0]
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax1,
+                xticklabels=['DOWN', 'HOLD', 'UP'],
+                yticklabels=['DOWN', 'HOLD', 'UP'])
+    ax1.set_xlabel('Predikované', fontweight='bold')
+    ax1.set_ylabel('Skutečné', fontweight='bold')
+    ax1.set_title('Confusion Matrix (absolutní počty)', fontweight='bold')
+    
+    # Normalizovaná
+    ax2 = axes[1]
+    sns.heatmap(cm_normalized, annot=True, fmt='.1f', cmap='RdYlGn', ax=ax2,
+                xticklabels=['DOWN', 'HOLD', 'UP'],
+                yticklabels=['DOWN', 'HOLD', 'UP'],
+                vmin=0, vmax=100)
+    ax2.set_xlabel('Predikované', fontweight='bold')
+    ax2.set_ylabel('Skutečné', fontweight='bold')
+    ax2.set_title('Confusion Matrix (% správnosti per třída)', fontweight='bold')
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGURES_DIR, "confusion_matrix_normalized.png"), dpi=300, bbox_inches='tight')
+    plt.close()
+    log("  Uloženo: confusion_matrix_normalized.png")
+    
+    # 7. CLASS DISTRIBUTION (Train vs Test)
+    log("\n7. Generování Class Distribution...")
+    
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    
+    train_counts = df_train['target'].value_counts().sort_index()
+    test_counts = pd.Series(y_test).value_counts().sort_index()
+    
+    class_names = ['DOWN\n(< -3%)', 'HOLD\n(±3%)', 'UP\n(> +3%)']
+    colors = ['#e74c3c', '#f39c12', '#27ae60']
+    
+    # Train
+    ax1 = axes[0]
+    bars1 = ax1.bar(class_names, [train_counts.get(i, 0) for i in range(3)], color=colors)
+    ax1.set_ylabel('Počet vzorků', fontweight='bold')
+    ax1.set_title(f'Trénovací data (n={len(df_train):,})', fontweight='bold')
+    for bar, val in zip(bars1, [train_counts.get(i, 0) for i in range(3)]):
+        ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 50,
+                 f'{val:,}', ha='center', fontweight='bold')
+    
+    # Test
+    ax2 = axes[1]
+    bars2 = ax2.bar(class_names, [test_counts.get(i, 0) for i in range(3)], color=colors)
+    ax2.set_ylabel('Počet vzorků', fontweight='bold')
+    ax2.set_title(f'Testovací data (n={len(y_test):,})', fontweight='bold')
+    for bar, val in zip(bars2, [test_counts.get(i, 0) for i in range(3)]):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 20,
+                 f'{val:,}', ha='center', fontweight='bold')
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGURES_DIR, "class_distribution.png"), dpi=300, bbox_inches='tight')
+    plt.close()
+    log("  Uloženo: class_distribution.png")
+    
+    # 8. PREDICTION CONFIDENCE ANALYSIS
+    log("\n8. Generování Prediction Confidence Analysis...")
+    
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    
+    # Confidence distribution
+    ax1 = axes[0]
+    correct_mask = y_test == y_pred
+    ax1.hist(df_test.loc[correct_mask, 'pred_confidence'], bins=20, alpha=0.7, 
+             label='Správné predikce', color='#27ae60')
+    ax1.hist(df_test.loc[~correct_mask, 'pred_confidence'], bins=20, alpha=0.7, 
+             label='Špatné predikce', color='#e74c3c')
+    ax1.set_xlabel('Confidence (pravděpodobnost nejistší třídy)', fontweight='bold')
+    ax1.set_ylabel('Počet predikcí', fontweight='bold')
+    ax1.set_title('Distribuce Confidence: Správné vs Špatné predikce', fontweight='bold')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    # Accuracy by confidence bin
+    ax2 = axes[1]
+    df_test['confidence_bin'] = pd.cut(df_test['pred_confidence'], bins=5)
+    df_test['correct'] = (y_test == y_pred).astype(int)
+    
+    accuracy_by_conf = df_test.groupby('confidence_bin', observed=True)['correct'].agg(['mean', 'count'])
+    accuracy_by_conf = accuracy_by_conf[accuracy_by_conf['count'] > 10]  # Min 10 vzorků
+    
+    if len(accuracy_by_conf) > 0:
+        x_labels = [f'{interval.left:.2f}-{interval.right:.2f}' for interval in accuracy_by_conf.index]
+        bars = ax2.bar(range(len(accuracy_by_conf)), accuracy_by_conf['mean'] * 100, color='#3498db')
+        ax2.set_xticks(range(len(accuracy_by_conf)))
+        ax2.set_xticklabels(x_labels, rotation=45, ha='right')
+        ax2.set_xlabel('Confidence rozsah', fontweight='bold')
+        ax2.set_ylabel('Accuracy (%)', fontweight='bold')
+        ax2.set_title('Accuracy podle Confidence úrovně', fontweight='bold')
+        ax2.axhline(y=33.3, color='r', linestyle='--', label='Random baseline')
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGURES_DIR, "prediction_confidence.png"), dpi=300, bbox_inches='tight')
+    plt.close()
+    log("  Uloženo: prediction_confidence.png")
+    
+    # 9. MONTHLY RETURNS HISTOGRAM
+    log("\n9. Generování Monthly Returns Histogram...")
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    returns = df_test['future_return'].dropna() * 100
+    
+    ax.hist(returns, bins=50, color='#3498db', edgecolor='white', alpha=0.8)
+    ax.axvline(x=-3, color='#e74c3c', linestyle='--', linewidth=2, label='DOWN threshold (-3%)')
+    ax.axvline(x=3, color='#27ae60', linestyle='--', linewidth=2, label='UP threshold (+3%)')
+    ax.axvline(x=0, color='black', linestyle='-', linewidth=1, alpha=0.5)
+    
+    ax.set_xlabel('Měsíční výnos (%)', fontweight='bold')
+    ax.set_ylabel('Počet pozorování', fontweight='bold')
+    ax.set_title('Distribuce měsíčních výnosů v testovacím období\n(ukazuje přirozené rozložení tříd)', fontweight='bold')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGURES_DIR, "returns_histogram.png"), dpi=300, bbox_inches='tight')
+    plt.close()
+    log("  Uloženo: returns_histogram.png")
+    
+    # =========================================================================
+    # BACKTEST METRIKY
+    # =========================================================================
+    
+    total_trades = (df_backtest['prediction'] != 1).sum()
+    long_trades = (df_backtest['prediction'] == 2).sum()
+    short_trades = (df_backtest['prediction'] == 0).sum()
+    
+    strategy_final = df_backtest['cumulative_strategy'].iloc[-1]
+    buyhold_final = df_backtest['cumulative_buyhold'].iloc[-1]
+    
+    strategy_return_pct = (strategy_final - 1) * 100
+    buyhold_return_pct = (buyhold_final - 1) * 100
+    
+    winning_trades = ((df_backtest['prediction'] != 1) & (df_backtest['strategy_return'] > 0)).sum()
+    win_rate = winning_trades / total_trades * 100 if total_trades > 0 else 0
+    
+    log("\n" + "=" * 50)
+    log("BACKTEST VÝSLEDKY")
+    log("=" * 50)
+    log(f"  Celkem obchodů: {total_trades:,}")
+    log(f"  Long pozice: {long_trades:,}")
+    log(f"  Short pozice: {short_trades:,}")
+    log(f"  Win Rate: {win_rate:.1f}%")
+    log(f"  Strategy Return: {strategy_return_pct:.2f}%")
+    log(f"  Buy & Hold Return: {buyhold_return_pct:.2f}%")
+    log(f"  Outperformance: {strategy_return_pct - buyhold_return_pct:.2f}%")
+    
+    # 10. Finální report
     log("\n" + "=" * 50)
     log("FINÁLNÍ VÝSLEDKY")
     log("=" * 50)
@@ -1014,11 +1248,25 @@ def final_evaluation():
                                for kk, vv in v.items()} 
                           for k, v in sector_metrics.items()},
         'n_test_samples': len(y_test),
+        'backtest': {
+            'total_trades': int(total_trades),
+            'long_trades': int(long_trades),
+            'short_trades': int(short_trades),
+            'win_rate': float(win_rate),
+            'strategy_return_pct': float(strategy_return_pct),
+            'buyhold_return_pct': float(buyhold_return_pct),
+            'outperformance_pct': float(strategy_return_pct - buyhold_return_pct)
+        },
         'figures': [
             'confusion_matrix.png',
+            'confusion_matrix_normalized.png',
             'roc_curves.png',
             'feature_importance.png',
-            'sector_comparison.png'
+            'sector_comparison.png',
+            'equity_curve.png',
+            'class_distribution.png',
+            'prediction_confidence.png',
+            'returns_histogram.png'
         ]
     }
     
@@ -1038,8 +1286,8 @@ def main():
     start_time = time.time()
     
     print("\n" + "=" * 70)
-    print(" ML PIPELINE PRO KLASIFIKACI CENOVÝCH POHYBŮ - 150 TICKERŮ")
-    print(" 5 sektorů × 30 firem | 10 let dat | DOWN/HOLD/UP klasifikace")
+    print(" ML PIPELINE PRO KLASIFIKACI CENOVYCH POHYBU - 150 TICKERU")
+    print(" 5 sektoru x 30 firem | 10 let dat | DOWN/HOLD/UP klasifikace")
     print("=" * 70)
     print(f"\nStart: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Výstup: {DATA_DIR}")

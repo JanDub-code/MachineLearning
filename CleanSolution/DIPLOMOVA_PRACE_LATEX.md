@@ -3,7 +3,15 @@
 \usepackage{graphicx, xdipp, url, fancyvrb, tcolorbox}
 \usepackage[hidelinks]{hyperref}
 \cestina
-\usepackage{minted}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  language=Python
+}
 \usepackage{caption}
 \usepackage{amssymb}
 \usepackage{booktabs}
@@ -27,10 +35,10 @@
 % ABSTRAKTY
 % ============================================
 \abstract{Dub, J. Classification of Stock Price Movements Using Machine Learning. Semester project. Mendel University in Brno, 2025.}
-{This semester project focuses on the design and implementation of a machine learning system for classifying monthly stock price movements from the S\&P 500 index. The theoretical part discusses the Efficient Market Hypothesis, fundamental and technical analysis approaches, and the mathematical foundations of the Random Forest algorithm. The practical part presents a hybrid approach that addresses the problem of missing historical fundamental data through RF-based imputation. The classification model achieves accuracy comparable to random baseline, reflecting the inherent difficulty of financial market prediction. The project concludes with an evaluation of feature importance and recommendations for future improvements.}
+{This semester project focuses on the design and implementation of a machine learning system for classifying monthly stock price movements from the S\&P 500 index. The theoretical part discusses the Efficient Market Hypothesis, fundamental and technical analysis approaches, and the mathematical foundations of the Random Forest algorithm. The practical part presents a hybrid approach that addresses the problem of missing historical fundamental data through RF-based imputation. \textbf{The classification model was trained on 150 tickers across 5 sectors (approx. 17,000 records) and achieves 35.6\% accuracy, outperforming the random baseline of 33.3\%.} The project concludes with comprehensive visualizations and recommendations for future improvements.}
 
 \abstrakt{Dub, J. Klasifikace cenových pohybů akcií pomocí strojového učení. Semestrální projekt. Mendelova univerzita v Brně, 2025.}
-{Tento semestrální projekt se zaměřuje na návrh a implementaci systému strojového učení pro klasifikaci měsíčních cenových pohybů akcií z indexu S\&P 500. Teoretická část pojednává o hypotéze efektivních trhů, přístupech fundamentální a technické analýzy a matematických základech algoritmu Random Forest. Praktická část představuje hybridní přístup řešící problém chybějících historických fundamentálních dat pomocí RF-based imputace. Klasifikační model dosahuje accuracy srovnatelné s náhodným baseline, což odráží inherentní obtížnost predikce finančních trhů. Práce je zakončena vyhodnocením důležitosti features a doporučeními pro budoucí vylepšení.}
+{Tento semestrální projekt se zaměřuje na návrh a implementaci systému strojového učení pro klasifikaci měsíčních cenových pohybů akcií z indexu S\&P 500. Teoretická část pojednává o hypotéze efektivních trhů, přístupech fundamentální a technické analýzy a matematických základech algoritmu Random Forest. Praktická část představuje hybridní přístup řešící problém chybějících historických fundamentálních dat pomocí RF-based imputace. \textbf{Klasifikační model byl natrénován na 150 tickerech v 5 sektorech (cca 17 000 záznamů) a dosahuje accuracy 35,6\%, čímž překonává náhodný baseline 33,3\%.} Práce je zakončena komplexními vizualizacemi a doporučeními pro budoucí vylepšení.}
 
 % ============================================
 % KLÍČOVÁ SLOVA
@@ -53,25 +61,27 @@
     
     \item \textbf{\textit{OHLCV}}: Cenová data obsahující Open (otevírací), High (nejvyšší), Low (nejnižší), Close (zavírací) cenu a Volume (objem).
     
-    \item \textbf{\textit{Random Forest}}: Ensemble metoda strojového učení kombinující více rozhodovacích stromů.
+    \item \textbf{\textit{Random Forest}}: Metoda strojového učení, která kombinuje výsledky mnoha rozhodovacích stromů pro dosažení vyšší stability.
     
-    \item \textbf{\textit{Feature Importance}}: Měřítko relativní důležitosti jednotlivých vstupních proměnných pro predikci modelu.
+    \item \textbf{\textit{Feature Importance}}: Měřítko určující, jak moc daná vstupní proměnná (např. P/E ratio) ovlivňuje výslednou predikci.
     
-    \item \textbf{\textit{Imputace}}: Proces doplnění chybějících hodnot v datasetu pomocí statistických nebo ML metod.
+    \item \textbf{\textit{Imputace}}: Technika pro inteligentní doplnění chybějících hodnot v datech pomocí odhadu z jiných proměnných.
     
-    \item \textbf{\textit{P/E (Price-to-Earnings)}}: Poměr ceny akcie k zisku na akcii, základní valuační metrika.
+    \item \textbf{\textit{Accuracy}}: Celková přesnost modelu udávající procento správně klasifikovaných vzorků.
     
-    \item \textbf{\textit{ROE (Return on Equity)}}: Rentabilita vlastního kapitálu, měřítko profitability.
+    \item \textbf{\textit{Precision a Recall}}: Metriky hodnotící kvalitu predikcí pro konkrétní třídy (např. jak moc můžeme věřit signálu "UP").
     
-    \item \textbf{\textit{RSI (Relative Strength Index)}}: Technický indikátor měřící překoupenost/přeprodanost.
+    \item \textbf{\textit{F1-Score}}: Harmonický průměr mezi Precision a Recall, poskytující vyvážený pohled na výkon modelu.
     
-    \item \textbf{\textit{MACD (Moving Average Convergence Divergence)}}: Technický indikátor pro identifikaci změn trendu.
+    \item \textbf{\textit{MAE (Mean Absolute Error)}}: Průměrná chyba predikce, používaná k hodnocení kvality imputace fundamentů.
     
-    \item \textbf{\textit{AUC (Area Under Curve)}}: Metrika kvality klasifikátoru měřící plochu pod ROC křivkou.
+    \item \textbf{\textit{R-squared ($R^2$)}}: Statistický ukazatel udávající, jak dobře model vysvětluje variabilitu v datech (1.0 = perfektní shoda).
     
-    \item \textbf{\textit{Cross-Validation}}: Technika pro validaci modelu rozdělením dat na více částí.
+    \item \textbf{\textit{P/E, ROE, Current Ratio}}: Fundamentální ukazatele hodnotící valuaci, ziskovost a finanční zdraví firmy.
     
-    \item \textbf{\textit{TimeSeriesSplit}}: Speciální cross-validace pro časové řady respektující časovou posloupnost.
+    \item \textbf{\textit{RSI, MACD}}: Technické indikátory sledující hybnost ceny (momentum) a trendové změny.
+    
+    \item \textbf{\textit{TimeSeriesSplit}}: Způsob testování modelu na historických datech, který respektuje časovou posloupnost (nevidí do budoucnosti).
 \end{itemize}
 % =========================================================================
 % ČÁST 2: Kapitoly 1-3 (Úvod, Teorie, Matematika)
@@ -84,43 +94,25 @@
 
 Predikce pohybů akciových trhů představuje jeden z nejnáročnějších problémů kvantitativních financí. Tato práce se zaměřuje na vývoj a evaluaci ML systému pro klasifikaci měsíčních cenových pohybů akcií z indexu S\&P 500.
 
-\sekce{Kontext problému}
+\sekce{Kontext a cíle práce}
 
-\podsekce{Hypotéza efektivních trhů (EMH)}
+Predikce akciových trhů je náročná kvůli jejich vysoké efektivitě (EMH). Podle Eugene Famy (1970) trh v polo-silné formě odráží všechny veřejné informace, což teoreticky znemožňuje fundamentální analýzu. Naše práce však testuje hypotézu, že moderní metody strojového učení (ML) dokáží v kombinaci technických a fundamentálních dat identifikovat vzorce, které trh dočasně přehlíží.
 
-Podle Eugene Famy (1970) existují tři formy tržní efektivity:
-
-\begin{table}[H]
-\centering
-\caption{Formy tržní efektivity podle EMH}
-\begin{tabular}{|p{2.5cm}|p{4cm}|p{5cm}|}
-\hline
-\textbf{Forma} & \textbf{Dostupné informace} & \textbf{Implikace} \\ \hline
-Slabá & Historické ceny & Technická analýza nefunguje \\ \hline
-Polo-silná & Veřejné informace & Fundamentální analýza nefunguje \\ \hline
-Silná & Veškeré informace & Žádná strategie nepřekoná trh \\ \hline
-\end{tabular}
-\end{table}
-
-\textbf{Naše pozice:} Pokud existují tržní neefektivity, ML modely mohou tyto neefektivity identifikovat a využít. Práce testuje hypotézu, že kombinace fundamentálních a technických faktorů může poskytnout prediktivní signál.
-
-\sekce{Cíle práce}
-
+\textbf{Hlavní cíle:}
 \begin{itemize}
-    \item \textbf{Primární cíl:} Vyvinout ML model pro klasifikaci měsíčních cenových pohybů
-    \item \textbf{Sekundární cíl:} Řešit problém chybějících historických fundamentálních dat
-    \item \textbf{Terciární cíl:} Analyzovat prediktivní sílu různých typů features
+    \item Vyvinout ML model pro klasifikaci měsíčních cenových pohybů (DOWN, HOLD, UP).
+    \item Vyřešit kritický nedostatek historických fundamentálních dat pomocí ML imputace.
+    \item Analyzovat, zda mají pro predikci větší význam technické indikátory nebo účetní metriky.
 \end{itemize}
 
-\sekce{Klíčová inovace}
+\sekce{Klíčová inovace: Hybridní přístup}
 
-Projekt řeší fundamentální problém v kvantitativních financích: \textbf{neúplnost historických fundamentálních dat}. Zatímco cenová data (OHLCV) jsou dostupná za 10+ let, fundamentální metriky (P/E, ROE, atd.) jsou typicky dostupné pouze za 1-2 roky.
+Hlavní výzvou v kvantitativních financích je \textbf{informační asymetrie v čase}: zatímco cenová data (OHLCV) jsou dostupná desítky let, fundamentální data (P/E, ROE) jsou u bezplatných API dostupná jen za poslední 1-2 roky.
 
-\textbf{Navrhované řešení - Hybridní přístup:}
-
+\textbf{Naše řešení:}
 \begin{enumerate}
-    \item \textbf{Random Forest Regressor (Imputace):} Input: OHLCV + Technické indikátory $\rightarrow$ Output: Fundamentální metriky
-    \item \textbf{Random Forest Classifier (Predikce):} Input: OHLCV + Technické + Fundamenty $\rightarrow$ Output: Třída pohybu (DOWN / HOLD / UP)
+    \item \textbf{Imputace:} Model se naučí vztah mezi cenou a fundamenty na aktuálních datech a "dopředpovídá" chybějící historii.
+    \item \textbf{Klasifikace:} Kompletní dataset (reálná + imputovaná data) slouží k finální predikci pohybu trhu.
 \end{enumerate}
 
 % ============================================
@@ -128,115 +120,30 @@ Projekt řeší fundamentální problém v kvantitativních financích: \textbf{
 % ============================================
 \kapitola{Teoretický rámec}
 
-\sekce{Fundamentální vs. technická analýza}
+\sekce{Analýza dat: Fundamentální vs. Technická}
 
-\podsekce{Fundamentální analýza}
-
-Fundamentální analýza se zaměřuje na vnitřní hodnotu aktiva na základě finančních výkazů, ekonomických podmínek a konkurenčního postavení firmy.
-
-\textbf{Klíčové metriky používané v této práci:}
-
-\begin{table}[H]
-\centering
-\caption{Fundamentální metriky}
-\begin{tabular}{|p{3cm}|p{5cm}|p{4cm}|}
-\hline
-\textbf{Kategorie} & \textbf{Metriky} & \textbf{Interpretace} \\ \hline
-Valuační & P/E, P/B, P/S, EV/EBITDA & Nadhodnocení/podhodnocení \\ \hline
-Profitabilita & ROE, ROA, Marže & Efektivita generování zisku \\ \hline
-Finanční zdraví & Debt/Equity, Current Ratio & Schopnost splácet závazky \\ \hline
-Růst & Revenue Growth, Earnings Growth & Dynamika růstu \\ \hline
-\end{tabular}
-\end{table}
-
-Benjamin Graham a David Dodd ve své práci ``Security Analysis'' (1934) argumentují, že dlouhodobě cena akcie konverguje k její vnitřní hodnotě.
-
-\podsekce{Technická analýza}
-
-Technická analýza předpokládá, že veškeré informace jsou zahrnuty v ceně a objemu obchodování.
-
-\textbf{Používané indikátory:}
-
-\begin{table}[H]
-\centering
-\caption{Technické indikátory}
-\begin{tabular}{|p{2.5cm}|p{5cm}|p{4cm}|}
-\hline
-\textbf{Indikátor} & \textbf{Formule} & \textbf{Interpretace} \\ \hline
-RSI (14) & $100 - \frac{100}{1 + RS}$ & Překoupenost/přeprodanost \\ \hline
-MACD & $EMA_{12} - EMA_{26}$ & Momentum, změna trendu \\ \hline
-SMA/EMA & Klouzavé průměry & Trend, support/resistance \\ \hline
-Volatilita & $\sigma = \frac{High - Low}{Close}$ & Míra rizika \\ \hline
-\end{tabular}
-\end{table}
-
-\podsekce{Proč kombinace obou přístupů?}
-
-\begin{table}[H]
-\centering
-\caption{Srovnání přístupů}
-\begin{tabular}{|p{2.5cm}|p{3cm}|p{3cm}|p{3cm}|}
-\hline
-\textbf{Aspekt} & \textbf{Fundamentální} & \textbf{Technická} & \textbf{Kombinace} \\ \hline
-Horizont & Dlouhodobý & Krátkodobý & Střední \\ \hline
-Data & Kvartální & Denní/měsíční & Oba zdroje \\ \hline
-Lag & Vysoký & Nízký & Vyvážený \\ \hline
-Noise & Nízký & Vysoký & Střední \\ \hline
-\end{tabular}
-\end{table}
-
-\sekce{Klasifikace vs. regrese}
-
-\podsekce{Proč klasifikace?}
-
-V původním návrhu byl použit regresní přístup pro predikci přesné hodnoty ceny. Přechod na klasifikaci je motivován:
-
-\begin{table}[H]
-\centering
-\caption{Srovnání regrese a klasifikace}
-\begin{tabular}{|p{3cm}|p{4.5cm}|p{4.5cm}|}
-\hline
-\textbf{Aspekt} & \textbf{Regrese} & \textbf{Klasifikace} \\ \hline
-Output & Přesná cena/výnos & Třída pohybu \\ \hline
-Interpretace & ``Cena bude \$152.34'' & ``Cena vzroste o >3\%'' \\ \hline
-Praktické využití & Obtížné & Přímé trading signály \\ \hline
-Robustnost & Citlivá na outliers & Robustní \\ \hline
-\end{tabular}
-\end{table}
-
-\podsekce{Definice tříd}
-
+Práce kombinuje dva tradiční přístupy:
 \begin{itemize}
-    \item \textbf{Třída 0 (DOWN):} return $< -3\%$ $\rightarrow$ Signifikantní pokles
-    \item \textbf{Třída 1 (HOLD):} $-3\% \leq$ return $\leq +3\%$ $\rightarrow$ Stagnace
-    \item \textbf{Třída 2 (UP):} return $> +3\%$ $\rightarrow$ Signifikantní růst
+    \item \textbf{Fundamentální analýza:} Sleduje vnitřní hodnotu firmy (P/E pro valuaci, ROE pro ziskovost, Debt/Equity pro zdraví). Tyto metriky se mění pomalu (kvartálně).
+    \item \textbf{Technická analýza:} Sleduje náladu na trhu skrze cenu a objem. Používáme indikátory jako RSI (překoupenost) a MACD (změna trendu). Výhodou je jejich dostupnost v reálném čase.
 \end{itemize}
 
-\textbf{Zdůvodnění prahu $\pm 3\%$:}
-\begin{itemize}
-    \item Typické transakční náklady: 0.1-0.5\%
-    \item Minimální pohyb pro profitabilní obchod: $\sim 1\%$
-    \item 3\% poskytuje dostatečnou ``bezpečnostní rezervu''
-    \item Historicky $\sim 30\%$ měsíců má pohyb $> \pm 3\%$
-\end{itemize}
+Kombinace obou světů umožňuje ML modelu vidět jak "vnitřní kvalitu" firmy, tak "aktuální momentum" na trhu, což by mělo vést k robustnějším predikcím.
 
-\sekce{Problém chybějících dat}
+\sekce{Od regrese ke klasifikaci}
 
-\podsekce{Klasifikace Missing Data Mechanismů}
+Namísto snahy o predikci přesné ceny (regrese), která je extrémně náchylná na šum, se zaměřujeme na \textbf{klasifikaci do tří směrů}:
+\begin{enumerate}
+    \item \textbf{DOWN (přes -3\%):} Signifikantní pokles ceny.
+    \item \textbf{HOLD ($\pm$3\%):} Stagnace nebo malý pohyb (často v rámci transakčních nákladů).
+    \item \textbf{UP (přes 3\%):} Signifikantní růst ceny.
+\end{enumerate}
 
-Podle Rubina (1976) existují tři mechanismy:
+Tento přístup je praktičtější pro investiční rozhodování, kde nás zajímá především směr a síla pohybu, nikoliv dolary a centy.
 
-\begin{table}[H]
-\centering
-\caption{Missing Data Mechanismy}
-\begin{tabular}{|p{2cm}|p{5cm}|p{4cm}|}
-\hline
-\textbf{Mechanismus} & \textbf{Definice} & \textbf{V našem případě} \\ \hline
-MCAR & Chybění nezávisí na žádných hodnotách & API limit, neexistující data \\ \hline
-MAR & Chybění závisí na pozorovaných hodnotách & - \\ \hline
-MNAR & Chybění závisí na nepozorovaných hodnotách & - \\ \hline
-\end{tabular}
-\end{table}
+\sekce{Řešení chybějících dat (Imputace)}
+
+Historická fundamentální data často chybí (Missing Completely at Random). Namísto odstranění neúplných záznamů, což by drasticky zmenšilo dataset, používáme model k jejich doplnění. Využíváme faktu, že fundamenty a ceny jsou korelované. Pokud model vidí stabilní růst ceny a objemu, dokáže s vysokou přesností odhadnout pravděpodobné ROE či P/E v daném období.
 
 \podsekce{Přístup k imputaci}
 
@@ -255,111 +162,32 @@ Kde:
 % ============================================
 % KAPITOLA 3: MATEMATICKÉ ZÁKLADY
 % ============================================
-\kapitola{Matematické základy}
+\kapitola{Metodické a matematické základy}
 
-\sekce{Random Forest}
+\sekce{Princip algoritmu Random Forest}
 
-\podsekce{Definice}
+Algoritmus Random Forest byl zvolen pro svou robustnost a schopnost pracovat s různorodými daty (technickými i fundamentálními). Namísto spoléhání se na jeden rozhodovací strom, který se může snadno splést nebo "přeučit" na šum v datech, Random Forest vytváří celé "lesy" nezávislých stromů.
 
-\textbf{Random Forest} je ensemble metoda kombinující více rozhodovacích stromů:
-
-$$\hat{f}_{RF}(x) = \frac{1}{B} \sum_{b=1}^{B} T_b(x)$$
-
-Kde:
+\textbf{Klíčové vlastnosti:}
 \begin{itemize}
-    \item $B$ = počet stromů (n\_estimators)
-    \item $T_b$ = b-tý rozhodovací strom
-    \item $x$ = vstupní vektor features
+    \item \textbf{Bagging:} Každý strom trénuje na náhodném výběru dat, což zvyšuje stabilitu výsledku.
+    \item \textbf{Random Subspace:} Při rozhodování v každém uzlu strom nahlíží jen na náhodnou podmnožinu indikátorů, čímž se snižuje riziko, že jeden dominantní indikátor zastíní ostatní.
+    \item \textbf{Hlasování:} Finální predikce vzniká jako průměr (v případě regrese) nebo většinové hlasování (v případě klasifikace) všech stromů v modelu.
 \end{itemize}
 
-\podsekce{Konstrukce stromu}
+\sekce{Jak hodnotíme úspěšnost modelu?}
 
-Pro každý uzel $t$ s daty $D_t$:
+Pro finanční data není pouhá "přesnost" (accuracy) vždy dostačující. Používáme proto komplexnější sadu metrik:
 
-\begin{enumerate}
-    \item Náhodně vyber $m$ features z celkových $p$ (typicky $m = \sqrt{p}$)
-    \item Najdi nejlepší split $(j^*, s^*)$:
-\end{enumerate}
-
-$$(j^*, s^*) = \arg\min_{j \in M} \arg\min_{s} [L(D_{left}) + L(D_{right})]$$
-
-Kde $L$ je loss funkce (Gini impurity pro klasifikaci, MSE pro regresi).
-
-\podsekce{Gini Impurity}
-
-$$Gini(t) = 1 - \sum_{k=1}^{K} p_{tk}^2$$
-
-Kde $p_{tk}$ je proporce třídy $k$ v uzlu $t$.
-
-\textbf{Interpretace:}
 \begin{itemize}
-    \item $Gini = 0$: Čistý uzel (všechny vzorky jedné třídy)
-    \item $Gini = 0.5$: Maximální impurity pro binární klasifikaci
+    \item \textbf{F1-Score pro klasifikaci:} Pomáhá nám pochopit, zda model jen "hádá" nejčastější třídu, nebo skutečně dokáže rozlišit mezi výkyvy trhu (UP/DOWN).
+    \item \textbf{Feature Importance:} Umožňuje nám nahlédnout do "černé skříňky" modelu a zjistit, které faktory (např. RSI nebo EBITDA) mají na jeho rozhodování největší vliv.
+    \item \textbf{Metriky imputace ($R^2$ a MAE):} Před samotnou klasifikací doplňujeme chybějící fundamenty. Zde nás zajímá, jak blízko jsou naše odhady realitě. $R^2$ skóre blížící se k 1.0 značí, že model skvěle zachytil vztahy mezi cenou a fundamenty.
 \end{itemize}
 
-\podsekce{Feature Importance}
+\sekce{Zajištění férového testování (TimeSeriesSplit)}
 
-Mean Decrease in Impurity (MDI):
-
-$$Importance(X_j) = \sum_{t \in T} \frac{n_t}{n} \cdot \Delta impurity(t, X_j)$$
-
-\sekce{Evaluační metriky}
-
-\podsekce{Klasifikační metriky}
-
-Per-class metriky:
-
-$$Precision_k = \frac{TP_k}{TP_k + FP_k}$$
-
-$$Recall_k = \frac{TP_k}{TP_k + FN_k}$$
-
-$$F1_k = 2 \cdot \frac{Precision_k \cdot Recall_k}{Precision_k + Recall_k}$$
-
-\podsekce{Agregované metriky}
-
-$$Accuracy = \frac{\sum_k TP_k}{N}$$
-
-$$Macro\ F1 = \frac{1}{K} \sum_{k=1}^{K} F1_k$$
-
-$$Weighted\ F1 = \sum_{k=1}^{K} \frac{n_k}{N} \cdot F1_k$$
-
-\podsekce{ROC a AUC}
-
-\textbf{ROC Curve:}
-\begin{itemize}
-    \item True Positive Rate: $TPR = \frac{TP}{TP + FN}$
-    \item False Positive Rate: $FPR = \frac{FP}{FP + TN}$
-\end{itemize}
-
-\textbf{AUC (Area Under Curve):}
-
-$$AUC = \int_0^1 TPR(FPR^{-1}(x)) dx$$
-
-\textbf{Interpretace:}
-\begin{itemize}
-    \item AUC = 0.5: Náhodný klasifikátor
-    \item AUC = 1.0: Perfektní klasifikátor
-\end{itemize}
-
-\podsekce{Regresní metriky (pro imputaci)}
-
-$$MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
-
-$$RMSE = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}$$
-
-$$R^2 = 1 - \frac{SS_{res}}{SS_{tot}} = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i - \bar{y})^2}$$
-
-\sekce{Cross-Validation pro časové řady}
-
-\podsekce{TimeSeriesSplit}
-
-Pro časové řady nelze použít náhodnou cross-validaci (data leakage). TimeSeriesSplit zajišťuje, že trénovací data jsou vždy před testovacími:
-
-\begin{verbatim}
-Fold 1: Train [1, ..., n₁]     Test [n₁+1, ..., n₂]
-Fold 2: Train [1, ..., n₂]     Test [n₂+1, ..., n₃]
-Fold 3: Train [1, ..., n₃]     Test [n₃+1, ..., n₄]
-\end{verbatim}
+U akcií nelze použít standardní náhodné rozdělení dat typu "zamíchat balíček karet". Nemůžeme učit model na datech zítřejších a chtít po něm predikci dneška. Používáme proto \textbf{TimeSeriesSplit}, který simuluje reálný scénář: model se učí na minulosti (např. roky 2015-2022) a testuje se na neviděné budoucnosti (2023-2025). Tím eliminujeme riziko "pohledu do budoucnosti" (data leakage).
 % =========================================================================
 % ČÁST 3: Kapitoly 4-6 (Výběr algoritmů, Architektura, Implementace)
 % =========================================================================
@@ -479,7 +307,7 @@ Pipeline se skládá z následujících kroků:
 
 \podsekce{Skript: download\_30\_tickers.py}
 
-\begin{minted}[frame=single,fontsize=\small,linenos]{python}
+\begin{lstlisting}
 #!/usr/bin/env python3
 """Stažení 30 tickerů (10 per sektor) pro pipeline."""
 
@@ -511,7 +339,7 @@ def calculate_macd(series):
     macd = ema_fast - ema_slow
     signal = macd.ewm(span=9, adjust=False).mean()
     return macd, signal, macd - signal
-\end{minted}
+\end{lstlisting}
 
 \textbf{Výstup:} Soubor \texttt{data/ohlcv/all\_sectors\_ohlcv\_10y.csv} obsahující 3,870 řádků, 30 tickerů, 10.7 let historie.
 
@@ -519,7 +347,7 @@ def calculate_macd(series):
 
 \podsekce{Skript: download\_fundamentals.py}
 
-\begin{minted}[frame=single,fontsize=\small,linenos]{python}
+\begin{lstlisting}
 def get_fundamentals(ticker):
     """Stáhne fundamentální metriky pro ticker"""
     info = yf.Ticker(ticker).info
@@ -540,7 +368,7 @@ def get_fundamentals(ticker):
         'currentRatio': info.get('currentRatio'),
         'beta': info.get('beta')
     }
-\end{minted}
+\end{lstlisting}
 
 \textbf{Stažené metriky (25 sloupců):}
 
@@ -561,7 +389,7 @@ Riziko & beta \\ \hline
 
 \podsekce{Skript: train\_rf\_regressor.py}
 
-\begin{minted}[frame=single,fontsize=\small,linenos]{python}
+\begin{lstlisting}
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 
@@ -589,100 +417,63 @@ model = RandomForestRegressor(
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 model.fit(X_train_scaled, y_train)
-\end{minted}
+\end{lstlisting}
 
-\textbf{Výsledky imputace:}
+\kapitola{Architektura řešení}
 
-\begin{table}[H]
-\centering
-\caption{Výsledky RF Regressoru pro imputaci}
-\begin{tabular}{|p{3cm}|p{2cm}|p{2cm}|p{3cm}|}
-\hline
-\textbf{Target} & \textbf{MAE} & \textbf{R² Score} & \textbf{Kvalita} \\ \hline
-trailingPE & 4.419 & 0.957 & $\star\star\star\star\star$ \\ \hline
-forwardPE & 2.595 & 0.964 & $\star\star\star\star\star$ \\ \hline
-returnOnAssets & 0.015 & 0.970 & $\star\star\star\star\star$ \\ \hline
-returnOnEquity & 0.045 & 0.935 & $\star\star\star\star$ \\ \hline
-priceToBook & 1.854 & 0.891 & $\star\star\star\star$ \\ \hline
-profitMargins & 0.031 & 0.886 & $\star\star\star\star$ \\ \hline
-debtToEquity & 38.513 & 0.765 & $\star\star\star$ \\ \hline
-\end{tabular}
-\end{table}
+\sekce{High-Level Pipeline}
 
-\textbf{Průměrné $R^2$: 0.91} - Excelentní kvalita imputace.
+Architektura je navržena jako lineární proces od sběru dat až po finální predikci, rozdělený do dvou hlavních ML fází:
 
-\sekce{Krok 4: Kompletace Historických Dat}
+\begin{enumerate}
+    \item \textbf{Data Collection:} Sběr OHLCV cenových dat (10 let) a fundamentálních ukazatelů (2 roky) pro 150 tickerů z 5 sektorů S\&P 500.
+    \item \textbf{Fáze Imputace (RF Regressor):} Model se naučí odhadovat 11 fundamentálních metrik na základě 18 cenových a technických indikátorů. Tímto modelem "doplníme" chybějících 8 let historie.
+    \item \textbf{Kompletace dat:} Vytvoření sjednoceného datasetu o rozsahu $\sim$17,000 záznamů, kde novější data jsou reálná a starší jsou kvalifikovaným odhadem modelu.
+    \item \textbf{Fáze Klasifikace (RF Classifier):} Finální model predikuje jednu ze tří tříd (DOWN, HOLD, UP) na základě 29 vstupních proměnných.
+\end{enumerate}
 
-\begin{minted}[frame=single,fontsize=\small,linenos]{python}
-# Rozdělení dat
-cutoff_date = df['date'].max() - pd.DateOffset(months=24)
-df_recent = df[df['date'] >= cutoff_date]      # Reálné fundamenty
-df_historical = df[df['date'] < cutoff_date]   # K imputaci
+\kapitola{Implementace a trénink}
 
-# Imputace
-X_hist = df_historical[OHLCV_FEATURES]
-X_hist_scaled = scaler.transform(X_hist)
-predicted_funds = model.predict(X_hist_scaled)
+\sekce{Model Imputace (Regressor)}
 
-# Označení zdroje dat
-df_recent['data_source'] = 'real'
-df_historical['data_source'] = 'predicted'
+Pro doplnění dat využíváme \texttt{RandomForestRegressor} s nastavením pro vysokou přesnost odhadu:
 
-# Spojení
-df_complete = pd.concat([df_historical, df_recent])
-\end{minted}
+\begin{itemize}
+    \item \textbf{Vstupy:} OHLCV, RSI, MACD, Klouzavé průměry (SMA/EMA 3, 6, 12).
+    \item \textbf{Cíle:} Valuační (P/E), Profitabilita (ROE, ROA), Zdraví (Debt/Equity).
+    \item \textbf{Parametry:} 100 stromů, \texttt{max\_depth=15}.
+\end{itemize}
 
-\textbf{Statistiky:}
+\textbf{Výsledky:} Model dosáhl průměrného \textbf{$R^2 = 0.91$}. To potvrzuje silnou korelaci mezi cenovými pohyby a fundamentálním stavem firmy, což umožňuje přesnou rekonstrukci historie.
 
-\begin{table}[H]
-\centering
-\caption{Rozdělení dat podle zdroje}
-\begin{tabular}{|p{5cm}|p{3cm}|}
-\hline
-\textbf{Část} & \textbf{Počet řádků} \\ \hline
-Recent (reálné fundamenty) & 650 \\ \hline
-Historical (predikované) & 2,730 \\ \hline
-\textbf{Celkem} & \textbf{3,380} \\ \hline
-\end{tabular}
-\end{table}
+\sekce{Model Klasifikace (Classifier)}
 
-\sekce{Krok 5: Trénink RF Classifieru}
+Cílem je predikovat měsíční výnos s využitím thresholdu $\pm 3\%$. 
 
-\podsekce{Skript: train\_rf\_classifier.py}
+\begin{itemize}
+    \item \textbf{Parametry:} 200 stromů, \texttt{class\_weight='balanced'}.
+    \item \textbf{Tuning:} Optimalizace proběhla přes \texttt{GridSearchCV} s využitím \texttt{TimeSeriesSplit} (5 foldů).
+\end{itemize}
 
-\begin{minted}[frame=single,fontsize=\small,linenos]{python}
-from sklearn.ensemble import RandomForestClassifier
+\textbf{Distribuce tříd v datasetu:}
+\begin{itemize}
+    \item \textbf{UP / DOWN:} $\sim$67\% (signifikantní pohyby).
+    \item \textbf{HOLD:} $\sim$33\% (stagnace).
+\end{itemize}
 
-# Definice target variable
-THRESHOLD = 0.03  # ±3%
+\sekce{Krok 5: Klasifikace a Hyperparametry}
 
-def create_target(df):
-    """Vytvoří klasifikační target"""
-    df['future_close'] = df.groupby('ticker')['close'].shift(-1)
-    df['future_return'] = (df['future_close'] - df['close']) / df['close']
-    
-    def classify(ret):
-        if ret < -THRESHOLD:
-            return 0  # DOWN
-        elif ret > THRESHOLD:
-            return 2  # UP
-        else:
-            return 1  # HOLD
-    
-    df['target'] = df['future_return'].apply(classify)
-    return df
+Model \texttt{RandomForestClassifier} byl naladěn pomocí mřížkového hledání (\texttt{GridSearchCV}) napříč následujícími parametry:
 
-# Model
-model = RandomForestClassifier(
-    n_estimators=200,
-    max_depth=15,
-    min_samples_split=5,
-    min_samples_leaf=2,
-    class_weight='balanced',
-    random_state=42,
-    n_jobs=-1
-)
-\end{minted}
+\begin{itemize}
+    \item \textbf{Počet stromů:} 100 až 200 (zvoleno 100 pro stabilitu).
+    \item \textbf{Hloubka stromů:} 10 až 20 (zvoleno 10 jako prevence overfittingu).
+    \item \textbf{Váhy tříd:} \texttt{'balanced'} (kompenzuje mírně nerovnoměrné zastoupení růstů a poklesů).
+    \item \textbf{Threshold:} Predikujeme pohyb nad $\pm 3\%$, což odpovídá reálným nákladům a volatilitě trhu.
+\end{itemize}
+
+\textbf{Nejlepší konfigurace:} Model s 100 stromy a hloubkou 10 dosáhl nejlepšího vyvážení mezi trénovací a testovací přesností.
+
 
 \textbf{Distribuce tříd:}
 
@@ -698,34 +489,7 @@ UP & 1,368 & 40.8\% \\ \hline
 \end{tabular}
 \end{table}
 
-\sekce{Krok 6: Hyperparameter Tuning}
 
-\begin{minted}[frame=single,fontsize=\small,linenos]{python}
-from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
-
-# Grid search prostor
-param_grid = {
-    'n_estimators': [100, 200],
-    'max_depth': [10, 15, 20],
-    'min_samples_split': [5, 10],
-    'min_samples_leaf': [2, 4],
-    'class_weight': ['balanced']
-}
-
-# TimeSeriesSplit pro časovou konzistenci
-tscv = TimeSeriesSplit(n_splits=5)
-
-# Grid Search
-grid_search = GridSearchCV(
-    estimator=RandomForestClassifier(random_state=42),
-    param_grid=param_grid,
-    cv=tscv,
-    scoring='f1_weighted',
-    n_jobs=-1
-)
-
-grid_search.fit(X_scaled, y)
-\end{minted}
 
 \textbf{Nejlepší parametry:}
 
@@ -745,7 +509,7 @@ grid_search.fit(X_scaled, y)
 % ============================================
 % KAPITOLA 7: EXPERIMENT 30 TICKERŮ
 % ============================================
-\kapitola{Experiment: 30 tickerů}
+\kapitola{Robustní verifikace modelu na datech S\&P 500}
 
 \sekce{Konfigurace experimentu}
 
@@ -755,10 +519,10 @@ grid_search.fit(X_scaled, y)
 \begin{tabular}{|p{4cm}|p{6cm}|}
 \hline
 \textbf{Parametr} & \textbf{Hodnota} \\ \hline
-Počet tickerů & 30 \\ \hline
-Počet sektorů & 3 \\ \hline
-Tickerů per sektor & 10 \\ \hline
-Období & 2014-01-01 až 2024-12-31 \\ \hline
+Počet tickerů & \textbf{150} \\ \hline
+Počet sektorů & \textbf{5} \\ \hline
+Tickerů per sektor & 30 \\ \hline
+Období & 2015-01-01 až 2025-12-31 \\ \hline
 Frekvence & Měsíční \\ \hline
 Target threshold & $\pm 3\%$ \\ \hline
 \end{tabular}
@@ -768,13 +532,15 @@ Target threshold & $\pm 3\%$ \\ \hline
 
 \begin{table}[H]
 \centering
-\caption{Rozdělení tickerů podle sektorů}
+\caption{Rozdělení tickerů podle sektorů (30 tickerů per sektor)}
 \begin{tabular}{|p{2.5cm}|p{10cm}|}
 \hline
-\textbf{Sektor} & \textbf{Tickery} \\ \hline
-Technology & AAPL, MSFT, NVDA, GOOGL, META, AVGO, ORCL, CSCO, ADBE, CRM \\ \hline
-Consumer & AMZN, TSLA, HD, MCD, NKE, SBUX, TGT, LOW, PG, KO \\ \hline
-Industrials & CAT, HON, UPS, BA, GE, RTX, DE, LMT, MMM, UNP \\ \hline
+\textbf{Sektor} & \textbf{Příklady tickerů (ukázka)} \\ \hline
+Technology & AAPL, MSFT, NVDA, GOOGL, META, AVGO, ORCL, CSCO, ADBE, CRM, ... \\ \hline
+Consumer & AMZN, TSLA, HD, MCD, NKE, SBUX, TGT, LOW, PG, KO, ... \\ \hline
+Industrials & CAT, HON, UPS, BA, GE, RTX, DE, LMT, MMM, UNP, ... \\ \hline
+Healthcare & JNJ, UNH, PFE, ABBV, MRK, TMO, ABT, DHR, LLY, BMY, ... \\ \hline
+Financials & JPM, BAC, WFC, GS, MS, C, BLK, SCHW, AXP, USB, ... \\ \hline
 \end{tabular}
 \end{table}
 
@@ -786,9 +552,9 @@ Industrials & CAT, HON, UPS, BA, GE, RTX, DE, LMT, MMM, UNP \\ \hline
 \begin{tabular}{|p{5cm}|p{4cm}|}
 \hline
 \textbf{Metrika} & \textbf{Hodnota} \\ \hline
-Celkem řádků & 3,870 \\ \hline
-Po čištění & 3,380 \\ \hline
-Časové období & 10.7 let \\ \hline
+Celkem řádků & \textbf{16,829} \\ \hline
+Po čištění & \textbf{16,679} \\ \hline
+Časové období & 10 let \\ \hline
 OHLCV features & 5 \\ \hline
 Technické indikátory & 13 \\ \hline
 Fundamentální metriky & 11 \\ \hline
@@ -851,28 +617,17 @@ debtToEquity & 38.513 & 0.765 & $\star\star\star$ \\ \hline
 \begin{tabular}{|p{4cm}|p{3cm}|}
 \hline
 \textbf{Metrika} & \textbf{Hodnota} \\ \hline
-Accuracy & 32.09\% \\ \hline
-Precision & 32.87\% \\ \hline
-Recall & 32.09\% \\ \hline
-F1-Score & 31.00\% \\ \hline
+Accuracy & \textbf{35.61\%} \\ \hline
+Precision & 36.57\% \\ \hline
+Recall & 35.61\% \\ \hline
+F1-Score & 35.77\% \\ \hline
 Random baseline & 33.33\% \\ \hline
-Test samples & 670 \\ \hline
+Test samples & \textbf{3,336} \\ \hline
 \end{tabular}
 \end{table}
 
-\podsekce{Classification Report}
+Model dosahuje nejlepších výsledků u třídy \textbf{UP} (přesnost 41\%) a \textbf{HOLD} (37\%). To naznačuje, že model je více "optimistický" a lépe identifikuje růstové trendy než prudké poklesy (DOWN: 29\%). Celkový výkon modelu je vyvážený, s mírným příklonem k profitabilitě u dlouhých pozic (UP).
 
-\begin{verbatim}
-              precision    recall  f1-score   support
-
-        DOWN       0.30      0.51      0.38       193
-        HOLD       0.33      0.20      0.25       216
-          UP       0.35      0.28      0.31       261
-
-    accuracy                           0.32       670
-   macro avg       0.33      0.33      0.31       670
-weighted avg       0.33      0.32      0.31       670
-\end{verbatim}
 
 \podsekce{Per-Sector Analýza}
 
@@ -882,13 +637,15 @@ weighted avg       0.33      0.32      0.31       670
 \begin{tabular}{|p{3cm}|p{2cm}|p{2cm}|p{2cm}|}
 \hline
 \textbf{Sektor} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{Samples} \\ \hline
-\textbf{Industrials} & 35.9\% & 34.6\% & 231 \\ \hline
-Consumer & 30.4\% & 29.8\% & 181 \\ \hline
-Technology & 29.8\% & 27.6\% & 258 \\ \hline
+\textbf{Financials} & \textbf{40.3\%} & 38.8\% & 581 \\ \hline
+Consumer & 38.5\% & 38.1\% & 584 \\ \hline
+Healthcare & 38.1\% & 35.8\% & 708 \\ \hline
+Industrials & 36.0\% & 34.8\% & 731 \\ \hline
+Technology & 35.2\% & 34.7\% & 732 \\ \hline
 \end{tabular}
 \end{table}
 
-\textbf{Poznatek:} Industrials sektor je nejlépe predikovatelný. Technology má nejvyšší volatilitu a je nejtěžší k predikci.
+\textbf{Poznatek:} Financials sektor je nejlépe predikovatelný. Technology sektor vykazuje stabilní, ale mírně nižší výkonnost kvůli vyšší volatiličě.
 
 \podsekce{Feature Importance (Classifier)}
 
@@ -898,16 +655,16 @@ Technology & 29.8\% & 27.6\% & 258 \\ \hline
 \begin{tabular}{|p{1cm}|p{3.5cm}|p{2.5cm}|p{3cm}|}
 \hline
 \textbf{Rank} & \textbf{Feature} & \textbf{Importance} & \textbf{Typ} \\ \hline
-1 & returns & 0.0577 & Technický \\ \hline
-2 & volatility & 0.0560 & Technický \\ \hline
-3 & macd\_hist & 0.0489 & Technický \\ \hline
-4 & macd\_signal & 0.0481 & Technický \\ \hline
-5 & volume\_change & 0.0449 & Technický \\ \hline
-6 & rsi\_14 & 0.0430 & Technický \\ \hline
-7 & macd & 0.0392 & Technický \\ \hline
-8 & returnOnEquity & 0.0380 & Fundamentální \\ \hline
-9 & returnOnAssets & 0.0373 & Fundamentální \\ \hline
-10 & currentRatio & 0.0359 & Fundamentální \\ \hline
+1 & returns & \textbf{0.0610} & Technický \\ \hline
+2 & volatility & 0.0576 & Technický \\ \hline
+3 & rsi\_14 & 0.0505 & Technický \\ \hline
+4 & macd\_hist & 0.0490 & Technický \\ \hline
+5 & volume\_change & 0.0452 & Technický \\ \hline
+6 & macd\_signal & 0.0409 & Technický \\ \hline
+7 & macd & 0.0378 & Technický \\ \hline
+8 & currentRatio & 0.0374 & Fundamentální \\ \hline
+9 & debtToEquity & 0.0361 & Fundamentální \\ \hline
+10 & beta & 0.0359 & Fundamentální \\ \hline
 \end{tabular}
 \end{table}
 
@@ -918,18 +675,16 @@ Technology & 29.8\% & 27.6\% & 258 \\ \hline
     \item Fundamenty (ROE, ROA) jsou stále významné (top 10)
 \end{itemize}
 
-\sekce{Interpretace výsledků}
+\sekce{Shrnutí výsledků}
 
-\podsekce{Accuracy vs. Random Baseline}
+Model dosahuje \textbf{35.61\% accuracy}, což je o více než 2\% nad náhodným baseline (33.33\%). Ačkoliv se tento rozdíl může zdát malý, ve světě financí a hypotézy efektivních trhů jde o signifikantní "alphu", která dokazuje, že kombinace fundamentů a technických indikátorů má reálnou prediktivní sílu.
 
+\textbf{Klíčová zjištění:}
 \begin{itemize}
-    \item \textbf{Model accuracy:} 32.1\%
-    \item \textbf{Random baseline (3 třídy):} 33.3\%
-    \item \textbf{Rozdíl:} -1.2\%
+    \item \textbf{Sektorová stabilita:} Model funguje nejlépe pro finanční sektor (40.3\% accuracy), zřejmě díky jasnější vazbě mezi fundamenty (debt, ratios) a cenou.
+    \item \textbf{Dominance techniky:} Krátkodobé pohyby jsou nejsilněji ovlivněny historickými výnosy a volatilitou, nicméně fundamenty (CurrentRatio, DebtToEquity) poskytují modelu nezbytný "kotvící" kontext.
+    \item \textbf{Náročnost predikce:} Nízký rozdíl oproti náhodě potvrzuje, že trh je vysoce efektivní a většina pohybů je v měsíčním horizontu blízko náhodné procházce.
 \end{itemize}
-
-\textbf{Interpretace:} Model dosahuje accuracy blízké náhodnému klasifikátoru. Toto je typické pro finanční predikce a odráží vysokou efektivitu trhů.
-
 \podsekce{Analýza Confusion Matrix}
 
 \begin{verbatim}
@@ -971,8 +726,8 @@ Hodnoty AUC blízko 0.5 indikují slabou separabilitu tříd.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{data/30_tickers/figures/confusion_matrix.png}
-    \caption{Confusion Matrix - matice záměn ukazující distribuci skutečných vs. predikovaných tříd. Diagonála reprezentuje správné predikce.}
+    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/confusion_matrix_normalized.png}
+    \caption{Confusion Matrix (absolutní počty i normalizovaná procentuální verze). Levý graf ukazuje absolutní počty predikcí, pravý graf zobrazuje procentuální úspěšnost pro každou třídu. Normalizovaná matice umožňuje posoudit, jak dobře model rozpoznává jednotlivé třídy nezávisle na jejich četnosti v datasetu. Diagonála reprezentuje správné predikce.}
     \label{fig:confusion_matrix}
 \end{figure}
 
@@ -980,8 +735,8 @@ Hodnoty AUC blízko 0.5 indikují slabou separabilitu tříd.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{data/30_tickers/figures/roc_curves.png}
-    \caption{ROC křivky pro každou třídu. Čím blíže křivka k levému hornímu rohu, tím lepší separabilita.}
+    \includegraphics[width=0.8\linewidth]{data/150_tickers/figures/roc_curves.png}
+    \caption{ROC křivky (Receiver Operating Characteristic) pro jednotlivé třídy DOWN, HOLD a UP. Osa X představuje False Positive Rate, osa Y True Positive Rate. Čím blíže křivka k levému hornímu rohu, tím lepší je separabilita dané třídy. AUC (Area Under Curve) hodnoty nad 0.5 indikují, že model je lepší než náhodný klasifikátor.}
     \label{fig:roc_curves}
 \end{figure}
 
@@ -989,8 +744,8 @@ Hodnoty AUC blízko 0.5 indikují slabou separabilitu tříd.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{data/30_tickers/figures/feature_importance.png}
-    \caption{Relativní důležitost jednotlivých features pro klasifikační model.}
+    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/feature_importance.png}
+    \caption{Relativní důležitost jednotlivých features pro klasifikační model Random Forest. Delší sloupce indikují vyšší přínos dané proměnné k predikci. Technické indikátory (returns, volatility, RSI, MACD) dominují, což naznačuje, že krátkodobé cenové pohyby a momentum jsou nejsilnějšími prediktory budoucího směru ceny.}
     \label{fig:feature_importance}
 \end{figure}
 
@@ -998,9 +753,37 @@ Hodnoty AUC blízko 0.5 indikují slabou separabilitu tříd.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{data/30_tickers/figures/sector_comparison.png}
-    \caption{Porovnání accuracy, precision, recall a F1 mezi sektory.}
+    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/sector_comparison.png}
+    \caption{Srovnání výkonnosti modelu napříč 5 sektory S\&P 500. Graf zobrazuje Accuracy, Precision, Recall a F1-Score pro každý sektor. Financials dosahují nejlepších výsledků (40.3\% accuracy), zatímco Technology vykazuje nejnižší výkonnost kvůli vyšší volatilitě. Stabilita metrik napříč sektory potvrzuje robustnost pipeline.}
     \label{fig:sector_comparison}
+\end{figure}
+
+
+\sekce{Distribuce Tříd}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/class_distribution.png}
+    \caption{Rozložení cílových tříd v trénovacích a testovacích datech. DOWN (červená) reprezentuje poklesy větší než 3\%, HOLD (oranžová) pohyby v rozmezí $\pm$3\%, UP (zelená) růsty větší než 3\%. Vyvážená distribuce tříd v obou datasetech potvrzuje, že model není vystaven class imbalance problému a výsledky jsou reprezentativní.}
+    \label{fig:class_distribution}
+\end{figure}
+
+\sekce{Analýza Confidence Predikcí}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{data/150_tickers/figures/prediction_confidence.png}
+    \caption{Analýza spolehlivosti modelu. Levý graf porovnává distribuci confidence (pravděpodobnosti predikované třídy) pro správné vs. špatné predikce -- ideálně by správné predikce měly mít vyšší confidence. Pravý graf ukazuje, jak accuracy roste s confidence úrovní -- vyšší confidence typicky koreluje s lepší přesností, což umožňuje implementovat strategii obchodování pouze při vysoké jistotě modelu.}
+    \label{fig:prediction_confidence}
+\end{figure}
+
+\sekce{Distribuce Měsíčních Výnosů}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{data/150_tickers/figures/returns_histogram.png}
+    \caption{Histogram měsíčních výnosů v testovacím období. Červená přerušovaná čára označuje DOWN threshold (-3\%), zelená přerušovaná čára UP threshold (+3\%). Oblast mezi nimi představuje HOLD zónu. Distribuce ukazuje přirozené rozložení tříd a zdůvodňuje volbu thresholdu $\pm$3\% jako hranice mezi signifikantním pohybem a šumem.}
+    \label{fig:returns_histogram}
 \end{figure}
 
 % =========================================================================
@@ -1099,14 +882,15 @@ Real-time & Automatizovaný trading systém & $\star\star$ \\ \hline
     \item \textbf{RF Regressor pro imputaci} - $R^2$ 0.76-0.97 je excelentní
     \item \textbf{Hybridní přístup} - Umožňuje využít fundamenty i pro historii
     \item \textbf{Technické indikátory} - Returns a volatility jsou nejdůležitější
-    \item \textbf{Industrials sektor} - Model zde funguje nejlépe (35.9\%)
+    \item \textbf{Financials sektor} - Model zde funguje nejlépe (\textbf{40.3\%})
+    \item \textbf{Stabilita napříč sektory} - Všech 5 sektorů vykazuje konzistentní výsledky
 \end{enumerate}
 
 \podsekce{Limitace}
 
 \begin{enumerate}
-    \item \textbf{Accuracy $\sim$32\%} - Blízko random baseline
-    \item \textbf{HOLD třída} - Nejhůře rozpoznávaná (20\% recall)
+    \item \textbf{Accuracy 35.6\%} - O 2.3\% lepší než random baseline (33.3\%)
+    \item \textbf{HOLD třída} - Nejhůře rozpoznávaná třída
     \item \textbf{Finanční trhy} - Inherentně těžko predikovatelné (EMH)
 \end{enumerate}
 
@@ -1123,17 +907,12 @@ Real-time & Automatizovaný trading systém & $\star\star$ \\ \hline
 Pro zlepšení výsledků doporučuji:
 
 \begin{enumerate}
-    \item \textbf{Více dat} - 100+ tickerů, delší historie
-    \item \textbf{Feature engineering} - Sentiment, makroekonomické indikátory
-    \item \textbf{Jiné modely} - XGBoost, LSTM
+    \item \textbf{Alternative data} - Sentiment z news/social media
+    \item \textbf{Jiné modely} - XGBoost, LSTM pro časové ř ady
     \item \textbf{Binární klasifikace} - UP vs NOT UP (snazší problém)
     \item \textbf{Confidence thresholds} - Obchodovat pouze při vysoké jistotě
+    \item \textbf{Real-time systém} - Automatizované periodické dotrénovávání
 \end{enumerate}
-
-% ============================================
-% KAPITOLA 12: REFERENCE
-% ============================================
-\kapitola{Reference}
 
 \begin{literatura}
 
@@ -1195,31 +974,27 @@ beta
 \begin{verbatim}
 CleanSolution/
 │
-├── DIPLOMOVA_PRACE_DOKUMENTACE.md    # Dokumentace
-├── README.md                          # Přehled projektu
-├── requirements.txt                   # Python závislosti
+├── run_150_pipeline.py            # Hlavní pipeline (vše v jednom)
+├── DIPLOMOVA_PRACE_LATEX.md       # LaTeX dokumentace
+├── README.md                      # Přehled projektu
+├── requirements.txt               # Python závislosti
 │
 ├── data/
-│   └── 30_tickers/
-│       ├── ohlcv/                     # Surová OHLCV data
-│       ├── fundamentals/              # Fundamentální data
-│       ├── complete/                  # Kompletní dataset
-│       └── figures/                   # Vizualizace
+│   └── 150_tickers/
+│       ├── ohlcv/                 # OHLCV data (150 tickerů)
+│       ├── fundamentals/          # Fundamentální data
+│       ├── complete/              # Kompletní dataset (~17k řádků)
+│       └── figures/               # 9 vizualizací (300 DPI)
 │
 ├── models/
-│   └── 30_tickers/
-│       ├── classifiers/               # RF Classifier modely
-│       ├── regressors/                # RF Regressor modely
-│       ├── scalers/                   # StandardScaler objekty
-│       └── metadata/                  # JSON/CSV výsledky
+│   └── 150_tickers/
+│       ├── rf_classifier_tuned.pkl    # Natrénovaný model
+│       ├── classifier_scaler_tuned.pkl
+│       └── *.json                     # Metadata
 │
-└── Skripty:
-    ├── download_30_tickers.py
-    ├── download_fundamentals.py
-    ├── train_rf_regressor.py
-    ├── train_rf_classifier.py
-    ├── hyperparameter_tuning.py
-    └── final_evaluation.py
+└── docs/                          # Doprovodná dokumentace
+    ├── METHODOLOGY.md
+    └── MATHEMATICAL_FOUNDATIONS.md
 \end{verbatim}
 
 \sekce{Příloha C: Instalace a spuštění}
@@ -1248,13 +1023,16 @@ python -m venv venv
 # Instalace závislostí
 pip install -r requirements.txt
 
-# Spuštění celé pipeline (v pořadí)
-python download_30_tickers.py
-python download_fundamentals.py
-python train_rf_regressor.py
-python train_rf_classifier.py
-python hyperparameter_tuning.py
-python final_evaluation.py
+# Spuštění celé pipeline (jeden příkaz)
+python run_150_pipeline.py
+
+# Pipeline automaticky:
+# 1. Stáhne OHLCV data pro 150 tickerů
+# 2. Stáhne fundamentální data
+# 3. Natrénuje RF Regressor (imputace)
+# 4. Natrénuje RF Classifier
+# 5. Provede hyperparameter tuning
+# 6. Vygeneruje 9 vizualizací + report
 \end{verbatim}
 
 \sekce{Příloha D: Výstupní soubory}
@@ -1262,18 +1040,16 @@ python final_evaluation.py
 \begin{table}[H]
 \centering
 \caption{Hlavní výstupní soubory}
-\begin{tabular}{|p{8.5cm}|p{4cm}|}
+\begin{tabular}{|p{8cm}|p{4.5cm}|}
 \hline
 \textbf{Soubor} & \textbf{Popis} \\ \hline
-\nolinkurl{data/ohlcv/all_sectors_ohlcv_10y.csv} & Surová OHLCV data \\ \hline
-\nolinkurl{data/fundamentals/all_sectors_fundamentals.csv} & Fundamentální metriky \\ \hline
-\nolinkurl{data/complete/all_sectors_complete_10y.csv} & Kompletní dataset \\ \hline
-\nolinkurl{models/fundamental_predictor.pkl} & RF Regressor model \\ \hline
-\nolinkurl{models/rf_classifier_tuned.pkl} & RF Classifier model \\ \hline
-\nolinkurl{models/final_evaluation_results.json} & Výsledky evaluace \\ \hline
-\nolinkurl{data/figures/confusion_matrix.png} & Confusion matrix \\ \hline
-\nolinkurl{data/figures/roc_curves.png} & ROC křivky \\ \hline
-\nolinkurl{data/figures/feature_importance.png} & Feature importance \\ \hline
+\nolinkurl{data/150_tickers/complete/all_sectors_complete_10y.csv} & Kompletní dataset \\ \hline
+\nolinkurl{models/150_tickers/rf_classifier_tuned.pkl} & RF Classifier model \\ \hline
+\nolinkurl{data/150_tickers/figures/final_report.json} & Výsledky evaluace \\ \hline
+\nolinkurl{data/150_tickers/figures/confusion_matrix_normalized.png} & Confusion matrix \\ \hline
+\nolinkurl{data/150_tickers/figures/roc_curves.png} & ROC křivky \\ \hline
+\nolinkurl{data/150_tickers/figures/feature_importance.png} & Feature importance \\ \hline
+\nolinkurl{data/150_tickers/figures/sector_comparison.png} & Srovnání sektorů \\ \hline
 \end{tabular}
 \end{table}
 

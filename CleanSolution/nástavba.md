@@ -46,11 +46,16 @@ Při přechodu na live trading je klíčové přidat vrstvu ochrany kapitálu:
 
 1.  **Signal Filtering:** Obchodovat pouze tehdy, pokud jistota modelu (prediction probability) přesáhne definovaný práh (např. 60 %).
 2.  **Vol-based Sizing:** Velikost pozice se dynamicky mění podle aktuální volatility trhu (ATR).
-3.  **Automatic Stop-Loss/Take-Profit:** Implementace přímo v exekuční pipeline.
+3.  **Trailing Drawdown Circuit Breaker (Pojistka z maxima):** 
+    *   **Princip:** Implementace dynamického stop-spínače. Model běží neomezeně, dokud je ziskový.
+    *   **Logika:** Pokud kapitál poklesne o **2–5 % od dosaženého denního maxima (High-Water Mark)**, model okamžitě zastaví veškerou obchodní činnost. 
+    *   **Příklad ochrany:** Pokud model během dne vygeneruje zisk +60 % (stav 160 % baseline) a trh se náhle otočí, pojistka se aktivuje při poklesu na 155 % baseline. Tím je ochráněna naprostá většina denního zisku a zabráněno jeho úplnému odevzdání při náhlé změně tržních pravidel.
+    *   **Cíl:** Zabránit "vymazání" úspěšného dne při nečekané volatilitě. Restart systému vyžaduje lidskou intervenci (revizi tržního kontextu).
+4.  **Automatic Stop-Loss/Take-Profit:** Implementace přímo v exekuční pipeline.
 
 ---
 
-## � 5. Strategický přesun: Forex jako ideální ML hřiště
+##  5. Strategický přesun: Forex jako ideální ML hřiště
 Přechod z akcií na měnové páry (Forex) nabízí pro náš systém několik zásadních výhod, které mohou významně zvýšit ziskovost a stabilitu.
 
 ### Proč je Forex pro algoritmy "lehčí"?

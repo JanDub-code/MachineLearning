@@ -4,9 +4,10 @@ import numpy as np
 
 def rsi(series: pd.Series, period: int = 14) -> pd.Series:
     delta = series.diff()
-    gain = delta.clip(lower=0).rolling(period).mean()
-    loss = (-delta.clip(upper=0)).rolling(period).mean()
-    rs = gain / loss.replace(0, np.nan)
+    gain = delta.clip(lower=0).rolling(period, min_periods=period).mean()
+    loss = (-delta.clip(upper=0)).rolling(period, min_periods=period).mean()
+    loss = loss.replace(0, np.finfo(float).eps)
+    rs = gain / loss
     return 100 - (100 / (1 + rs))
 
 
@@ -24,7 +25,7 @@ def atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
     high_close = (df["high"] - df["close"].shift()).abs()
     low_close = (df["low"] - df["close"].shift()).abs()
     tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-    return tr.rolling(period).mean()
+    return tr.rolling(period, min_periods=period).mean()
 
 
 def build_features(df: pd.DataFrame, horizon_minutes: int = 5) -> pd.DataFrame:
@@ -32,15 +33,15 @@ def build_features(df: pd.DataFrame, horizon_minutes: int = 5) -> pd.DataFrame:
     df = df.sort_values("time").reset_index(drop=True)
 
     # Basic returns
-    df["return_1"] = df["close"].pct_change().fillna(0)
+    df["return_1"] = df["close"].pct_change()
     df["return_h"] = df["close"].pct_change(periods=horizon_minutes).shift(-horizon_minutes)
 
     # Volatility and ATR
-    df["volatility"] = df["return_1"].rolling(60).std().fillna(0)
-    df["atr"] = atr(df).bfill().fillna(0)
+    df["volatility"] = df["return_1"].rolling(60, min_periods=60).std()
+    df["atr"] = atr(df)
 
     # RSI and MACD
-    df["rsi_14"] = rsi(df["close"]).bfill().fillna(50)
+    df["rsi_14"] = rsi(df["close"])
     macd_line, signal_line, hist = macd(df["close"])
     df["macd"] = macd_line
     df["macd_signal"] = signal_line
@@ -48,8 +49,8 @@ def build_features(df: pd.DataFrame, horizon_minutes: int = 5) -> pd.DataFrame:
 
     # Moving averages
     for w in (3, 6, 12, 24, 48, 96):
-        df[f"sma_{w}"] = df["close"].rolling(w).mean()
-        df[f"ema_{w}"] = df["close"].ewm(span=w, adjust=False).mean()
+        df[f"sma_{w}"] = df["close"].rolling(w, min_periods=w).mean()
+        df[f"ema_{w}"] = df["close"].ewm(span=w, min_periods=w, adjust=False).mean()
 
     # Time encodings
     df["minute"] = df["time"].dt.minute

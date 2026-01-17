@@ -1,4 +1,3 @@
-import datetime as dt
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -6,7 +5,6 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.model_selection import train_test_split
 
 from .configs import load_settings
 from .features import build_features
@@ -21,7 +19,7 @@ def _split_window(df: pd.DataFrame, holdout_hours: int) -> Tuple[pd.DataFrame, p
 
 def _train_single(df: pd.DataFrame, window_weeks: int, holdout_hours: int) -> Dict:
     train_df, val_df = _split_window(df, holdout_hours)
-    feature_cols = [c for c in df.columns if c not in {"time", "target"}]
+    feature_cols = [c for c in df.columns if c not in {"time", "target", "return_h"}]
     X_train, y_train = train_df[feature_cols], train_df["target"]
     X_val, y_val = val_df[feature_cols], val_df["target"]
 

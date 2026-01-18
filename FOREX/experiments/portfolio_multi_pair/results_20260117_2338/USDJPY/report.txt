@@ -1,0 +1,18 @@
+==================================================
+RISK METRICS REPORT
+==================================================
+Total Trades:       44
+Total PnL:          +128.2 pips
+Expectancy/Trade:   +2.91 pips
+Win Rate:           52.3%
+Profit Factor:      1.81
+--------------------------------------------------
+Max Drawdown:       46.4 pips
+DD Duration:        9 trades
+Worst Day:          -13.9 pips
+Best Day:           +43.5 pips
+--------------------------------------------------
+VaR (95%):          11.2 pips
+Expected Shortfall: 12.5 pips
+Sharpe Ratio:       4.34
+==================================================

@@ -1,0 +1,14 @@
+{
+  "total_trades": 10,
+  "total_pnl": 14.207142857141708,
+  "expectancy": 1.4207142857141708,
+  "win_rate": 0.5,
+  "profit_factor": 1.861038961038878,
+  "max_drawdown": 7.494642857142347,
+  "max_dd_duration": 3,
+  "worst_day": -3.155357142857768,
+  "best_day": 7.74821428571359,
+  "var_95": 5.376964285714287,
+  "expected_shortfall": 7.194642857142347,
+  "sharpe_ratio": 3.7820596387528886
+}

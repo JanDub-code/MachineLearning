@@ -1,0 +1,18 @@
+==================================================
+RISK METRICS REPORT
+==================================================
+Total Trades:       0
+Total PnL:          +0.0 pips
+Expectancy/Trade:   +0.00 pips
+Win Rate:           0.0%
+Profit Factor:      0.00
+--------------------------------------------------
+Max Drawdown:       0.0 pips
+DD Duration:        0 trades
+Worst Day:          +0.0 pips
+Best Day:           +0.0 pips
+--------------------------------------------------
+VaR (95%):          0.0 pips
+Expected Shortfall: 0.0 pips
+Sharpe Ratio:       0.00
+==================================================

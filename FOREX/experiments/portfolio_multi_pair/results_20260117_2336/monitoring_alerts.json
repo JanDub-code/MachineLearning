@@ -1,0 +1,17 @@
+{
+  "alerts": [],
+  "portfolio": {
+    "total_trades": 322,
+    "total_pnl": 217.30535714287663,
+    "expectancy": 0.6748613575865734,
+    "win_rate": 0.5093167701863354,
+    "profit_factor": 1.3354023058202582,
+    "max_drawdown": 63.341071428571965,
+    "max_dd_duration": 136,
+    "worst_day": -32.02678571427934,
+    "best_day": 61.25535714285999,
+    "var_95": 7.223482142856878,
+    "expected_shortfall": 9.043172268907366,
+    "sharpe_ratio": 3.8737262317237877
+  }
+}

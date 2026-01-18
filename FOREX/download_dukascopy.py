@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
 """
-Dukascopy Direct Downloader - EURUSD 1m candles
+Dukascopy Direct Downloader - 1m candles
 
 Downloads tick data directly from Dukascopy servers and converts to 1m OHLCV.
 No external dependencies needed beyond requests and pandas.
 
-Data range: 2025-10-17 to 2026-01-17 (3 months)
+Defaults: EURUSD, 2025-10-17 to 2026-01-17 (3 months)
 """
 
-import requests
-import struct
+import argparse
 import lzma
+import struct
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-import pandas as pd
-from io import BytesIO
-import time
+from typing import List
 
-# Configuration
-PAIR = "EURUSD"
-START_DATE = datetime(2025, 10, 17)
-END_DATE = datetime(2026, 1, 17)
-OUTPUT_DIR = Path(__file__).parent / "data" / "dukascopy" / PAIR
+import pandas as pd
+import requests
+
+from src.portfolio_baskets import get_basket
+
+# Defaults
+DEFAULT_PAIR = "EURUSD"
+DEFAULT_START_DATE = datetime(2025, 10, 17)
+DEFAULT_END_DATE = datetime(2026, 1, 17)
+DEFAULT_OUTPUT_DIR = Path(__file__).parent / "data" / "dukascopy"
 
 # Dukascopy URL pattern for tick data
 # Format: https://datafeed.dukascopy.com/datafeed/{PAIR}/{YYYY}/{MM-1}/{DD}/{HH}h_ticks.bi5
@@ -107,7 +111,7 @@ def ticks_to_ohlcv(ticks: list, timeframe: str = '1min') -> pd.DataFrame:
     return ohlcv
 
 
-def download_day(pair: str, date: datetime) -> pd.DataFrame:
+def download_day(pair: str, date: datetime, sleep_hour: float = 0.1) -> pd.DataFrame:
     """Download all hours for a specific day."""
     all_ticks = []
     
@@ -117,86 +121,100 @@ def download_day(pair: str, date: datetime) -> pd.DataFrame:
         all_ticks.extend(ticks)
         
         # Small delay to be nice to servers
-        time.sleep(0.1)
+        time.sleep(sleep_hour)
     
     return ticks_to_ohlcv(all_ticks)
 
 
-def main():
-    """Main download function."""
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Dukascopy downloader (1m candles)")
+    parser.add_argument("--pairs", default=DEFAULT_PAIR, help="Comma-separated pairs (e.g., EURUSD,USDJPY)")
+    parser.add_argument("--basket", default=None, help="Named basket (basket_6, basket_8). Overrides --pairs")
+    parser.add_argument("--start-date", default=DEFAULT_START_DATE.date().isoformat(), help="YYYY-MM-DD")
+    parser.add_argument("--end-date", default=DEFAULT_END_DATE.date().isoformat(), help="YYYY-MM-DD")
+    parser.add_argument("--output-dir", default=None, help="Base output dir (default: data/dukascopy)")
+    parser.add_argument("--sleep-hour", type=float, default=0.1, help="Delay after each hour (seconds)")
+    parser.add_argument("--sleep-day", type=float, default=0.3, help="Delay after each day (seconds)")
+    return parser.parse_args()
+
+
+def _resolve_pairs(args: argparse.Namespace) -> List[str]:
+    if args.basket:
+        return get_basket(args.basket)
+    return [p.strip().upper() for p in args.pairs.split(",") if p.strip()]
+
+
+def download_pair(
+    pair: str,
+    start_date: datetime,
+    end_date: datetime,
+    output_base: Path,
+    sleep_hour: float,
+    sleep_day: float,
+) -> Path:
+    output_dir = output_base / pair
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     print("=" * 60)
-    print("🌐 DUKASCOPY EURUSD DOWNLOADER")
+    print(f"🌐 DUKASCOPY DOWNLOADER: {pair}")
     print("=" * 60)
-    print(f"Pair: {PAIR}")
-    print(f"Range: {START_DATE.date()} → {END_DATE.date()}")
-    print(f"Timeframe: 1 minute candles")
-    print(f"Output: {OUTPUT_DIR}")
+    print(f"Range: {start_date.date()} → {end_date.date()}")
+    print("Timeframe: 1 minute candles")
+    print(f"Output: {output_dir}")
     print("=" * 60)
-    
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Calculate total days
-    total_days = (END_DATE - START_DATE).days + 1
-    daily_files = []
-    
-    current = START_DATE
+
+    total_days = (end_date - start_date).days + 1
+    daily_files: List[Path] = []
+
+    current = start_date
     day_count = 0
-    
-    while current <= END_DATE:
+
+    while current <= end_date:
         day_count += 1
         weekday = current.weekday()
-        
-        # Skip weekends (Sat=5, Sun=6) - forex market closed
+
         if weekday in [5, 6]:
             print(f"[{day_count:3}/{total_days}] {current.date()} - Weekend, skipping")
             current += timedelta(days=1)
             continue
-        
-        # Check if already downloaded
-        day_file = OUTPUT_DIR / f"{current.date()}.csv"
+
+        day_file = output_dir / f"{current.date()}.csv"
         if day_file.exists():
             print(f"[{day_count:3}/{total_days}] {current.date()} - Already exists, skipping")
             daily_files.append(day_file)
             current += timedelta(days=1)
             continue
-        
+
         print(f"[{day_count:3}/{total_days}] {current.date()} - Downloading...", end=" ", flush=True)
-        
-        df = download_day(PAIR, current)
-        
+
+        df = download_day(pair, current, sleep_hour=sleep_hour)
+
         if len(df) > 0:
-            # Save immediately!
             df.to_csv(day_file)
             daily_files.append(day_file)
             print(f"✅ {len(df)} candles saved")
         else:
-            print(f"⚠️  No data (holiday?)")
-        
+            print("⚠️  No data (holiday?)")
+
         current += timedelta(days=1)
-        
-        # Rate limit
-        time.sleep(0.3)
-    
+        time.sleep(sleep_day)
+
     if not daily_files:
         print("❌ No data downloaded!")
-        return
-    
-    # Combine all days
+        return output_dir
+
     print(f"\n📊 Combining {len(daily_files)} daily files...")
     all_data = [pd.read_csv(f, index_col=0, parse_dates=True) for f in daily_files]
     combined = pd.concat(all_data)
     combined.sort_index(inplace=True)
-    combined = combined[~combined.index.duplicated(keep='first')]
-    
-    # Save as Parquet (efficient)
-    parquet_path = OUTPUT_DIR / f"{PAIR}_1m_{START_DATE.date()}_{END_DATE.date()}.parquet"
-    combined.to_parquet(parquet_path, compression='zstd')
-    
-    # Also save combined CSV
-    csv_path = OUTPUT_DIR / f"{PAIR}_1m_{START_DATE.date()}_{END_DATE.date()}.csv"
+    combined = combined[~combined.index.duplicated(keep="first")]
+
+    parquet_path = output_dir / f"{pair}_1m_{start_date.date()}_{end_date.date()}.parquet"
+    combined.to_parquet(parquet_path, compression="zstd")
+
+    csv_path = output_dir / f"{pair}_1m_{start_date.date()}_{end_date.date()}.csv"
     combined.to_csv(csv_path)
-    
-    # Summary
+
     print("\n" + "=" * 60)
     print("✅ DOWNLOAD COMPLETE")
     print("=" * 60)
@@ -205,12 +223,31 @@ def main():
     print(f"Parquet: {parquet_path} ({parquet_path.stat().st_size / 1024 / 1024:.1f} MB)")
     print(f"CSV: {csv_path} ({csv_path.stat().st_size / 1024 / 1024:.1f} MB)")
     print("=" * 60)
-    
-    # Quick data preview
-    print("\n� Data preview:")
-    print(combined.head(10))
+
+    print("\nData preview:")
+    print(combined.head(5))
     print("...")
-    print(combined.tail(5))
+    print(combined.tail(3))
+
+    return parquet_path
+
+
+def main():
+    args = _parse_args()
+    pairs = _resolve_pairs(args)
+    start_date = datetime.fromisoformat(args.start_date)
+    end_date = datetime.fromisoformat(args.end_date)
+    output_base = Path(args.output_dir) if args.output_dir else DEFAULT_OUTPUT_DIR
+
+    for pair in pairs:
+        download_pair(
+            pair=pair,
+            start_date=start_date,
+            end_date=end_date,
+            output_base=output_base,
+            sleep_hour=args.sleep_hour,
+            sleep_day=args.sleep_day,
+        )
 
 
 if __name__ == "__main__":
